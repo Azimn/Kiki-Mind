@@ -1,0 +1,29 @@
+test_activation_projector_respects_function_version (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_activation_projector_respects_function_version) ... ok
+test_append_only_and_hash_chain (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_append_only_and_hash_chain) ... ok
+test_canonical_endorsement_requires_live_operator (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_canonical_endorsement_requires_live_operator) ... ok
+test_causal_ancestry_and_parent_lists_must_agree (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_causal_ancestry_and_parent_lists_must_agree) ... ok
+test_content_taint_is_hereditary (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_content_taint_is_hereditary) ... ok
+test_derived_interpretation_requires_ancestry (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_derived_interpretation_requires_ancestry) ... ok
+test_direct_activation_write_is_forbidden (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_direct_activation_write_is_forbidden) ... ok
+test_encounter_requires_activation_version (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_encounter_requires_activation_version) ... ok
+test_event_id_collision_with_different_proposal_conflicts (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_event_id_collision_with_different_proposal_conflicts) ... ok
+test_event_id_retry_is_crash_idempotent (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_event_id_retry_is_crash_idempotent) ... ok
+test_expired_lease_can_be_recovered_by_same_operator (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_expired_lease_can_be_recovered_by_same_operator) ... ok
+test_gate_cannot_be_supplied_per_commit (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_gate_cannot_be_supplied_per_commit) ... ok
+test_idempotency_key_collision_still_conflicts (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_idempotency_key_collision_still_conflicts) ... ok
+test_initial_lease_must_expire_in_future (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_initial_lease_must_expire_in_future) ... ok
+test_lease_recovery_must_name_latest_lease (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_lease_recovery_must_name_latest_lease) ... ok
+test_missing_append_only_trigger_blocks_next_commit (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_missing_append_only_trigger_blocks_next_commit) ... ok
+test_provenance_reference_does_not_blind_design_history (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_provenance_reference_does_not_blind_design_history) ... ok
+test_raw_sql_forged_insert_blocks_next_commit (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_raw_sql_forged_insert_blocks_next_commit) ... ok
+test_raw_sql_forged_insert_is_detected_on_open (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_raw_sql_forged_insert_is_detected_on_open) ... ok
+test_renderer_must_be_registered (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_renderer_must_be_registered) ... ok
+test_tainted_content_cannot_be_autobiographical (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_tainted_content_cannot_be_autobiographical) ... ok
+test_unknown_housekeeping_table_is_rejected_on_open (tests.test_kiki_mind_impl001.KikiMindImplementation0011Tests.test_unknown_housekeeping_table_is_rejected_on_open) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 0.064s
+
+OK
+
+returncode: 0
