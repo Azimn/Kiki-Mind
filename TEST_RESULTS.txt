@@ -1,0 +1,19 @@
+test_activation_must_be_derived_and_mode_specific (tests.test_kiki_mind_impl001.Tests.test_activation_must_be_derived_and_mode_specific) ... ok
+test_append_only_and_hash_chain (tests.test_kiki_mind_impl001.Tests.test_append_only_and_hash_chain) ... ok
+test_causal_lists_cannot_disagree (tests.test_kiki_mind_impl001.Tests.test_causal_lists_cannot_disagree) ... ok
+test_derived_requires_provenance (tests.test_kiki_mind_impl001.Tests.test_derived_requires_provenance) ... ok
+test_encounter_requires_accounting_fields (tests.test_kiki_mind_impl001.Tests.test_encounter_requires_accounting_fields) ... ok
+test_expired_lease_blocks_endorsement (tests.test_kiki_mind_impl001.Tests.test_expired_lease_blocks_endorsement) ... ok
+test_idempotency (tests.test_kiki_mind_impl001.Tests.test_idempotency) ... ok
+test_idempotency_key_cannot_alias_different_proposal (tests.test_kiki_mind_impl001.Tests.test_idempotency_key_cannot_alias_different_proposal) ... ok
+test_operator_lease_and_two_party_endorsement (tests.test_kiki_mind_impl001.Tests.test_operator_lease_and_two_party_endorsement) ... ok
+test_renderer_attribution (tests.test_kiki_mind_impl001.Tests.test_renderer_attribution) ... ok
+test_taint_inherits_on_content_but_not_reference (tests.test_kiki_mind_impl001.Tests.test_taint_inherits_on_content_but_not_reference) ... ok
+test_tainted_content_rejected_as_autobiography (tests.test_kiki_mind_impl001.Tests.test_tainted_content_rejected_as_autobiography) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.122s
+
+OK
+
+returncode: 0

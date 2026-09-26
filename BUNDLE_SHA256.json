@@ -1,0 +1,14 @@
+{
+  ".gitignore": "0a285e25c01d635f5665d1a311279ae4790245cb485161b37dc45679da7195f6",
+  "PATCH_NOTES.md": "5100c0e368ef5f1d24dc37cfb4991edb6a45417da980022bf62d4201616ba9a4",
+  "TEST_RESULTS.txt": "27e358e8e0913d0f329a793939e5120890d96538da30f976b985f43364ef2dc6",
+  "docs/KIKI_MIND_v0.2.2_IMPLEMENTATION_SPEC_001.md": "aea5da1a4278f390ab65162458027066f8fd032d3cef1b0ccce328476c6510ab",
+  "runtime/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "runtime/kiki_mind/__init__.py": "d4f9df45a16ecb3cddad1d4373deae6f5a12f19d625f171862be4fb8fce7b1ae",
+  "runtime/kiki_mind/activation.py": "8f5dfac3dd0ed4cef61fdc22b0aa53b2640fdd31ef989d6ec0960163bf04e8ff",
+  "runtime/kiki_mind/gate.py": "2c19f3e2779cc2ec3e85645fa2b771ef86368d5df0823a3f4264b471efe0456f",
+  "runtime/kiki_mind/ledger.py": "1fa9d1eb2b4bb5ba0660566310ffab670b8a088a8676e285aaaf4816d392acd1",
+  "runtime/kiki_mind/models.py": "65a6c93bd00e17fcdb65232c5ba4381d1d8a47c2c943847b626b51a9ea55bf74",
+  "tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tests/test_kiki_mind_impl001.py": "51e22a44e84e7c1a9444d0b810d19f7f55a74a79df4e3341ce1d421dff9c7567"
+}
