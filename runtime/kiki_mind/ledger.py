@@ -228,6 +228,28 @@ class EventLedger:
         "canonical_events_no_update",
         "canonical_events_no_delete",
     }
+    _EXPECTED_TRIGGER_SQL = {
+        "canonical_events_no_update": """
+            CREATE TRIGGER canonical_events_no_update
+            BEFORE UPDATE ON canonical_events
+            BEGIN
+                SELECT RAISE(
+                    ABORT,
+                    'canonical event ledger is append-only'
+                );
+            END
+        """,
+        "canonical_events_no_delete": """
+            CREATE TRIGGER canonical_events_no_delete
+            BEFORE DELETE ON canonical_events
+            BEGIN
+                SELECT RAISE(
+                    ABORT,
+                    'canonical event ledger is append-only'
+                );
+            END
+        """,
+    }
     _EXPECTED_EVENT_COLUMNS = (
         "sequence",
         "event_id",
@@ -274,12 +296,29 @@ class EventLedger:
         return conn
 
     def _initialize(self) -> None:
+        """Create the canonical schema only for a genuinely empty database.
+
+        Existing schema is evidence. Opening an existing ledger must not repair
+        missing or altered integrity objects before verification can inspect
+        them.
+        """
         Path(self.path).parent.mkdir(parents=True, exist_ok=True)
         conn = self._connect()
         try:
+            existing = conn.execute(
+                """
+                SELECT 1
+                FROM sqlite_schema
+                WHERE name NOT LIKE 'sqlite_%'
+                LIMIT 1
+                """
+            ).fetchone()
+            if existing is not None:
+                return
+
             conn.executescript(
                 """
-                CREATE TABLE IF NOT EXISTS canonical_events (
+                CREATE TABLE canonical_events (
                     sequence INTEGER PRIMARY KEY AUTOINCREMENT,
                     event_id TEXT NOT NULL UNIQUE,
                     committed_at TEXT NOT NULL,
@@ -302,7 +341,7 @@ class EventLedger:
                     event_hash TEXT NOT NULL UNIQUE
                 );
 
-                CREATE TRIGGER IF NOT EXISTS canonical_events_no_update
+                CREATE TRIGGER canonical_events_no_update
                 BEFORE UPDATE ON canonical_events
                 BEGIN
                     SELECT RAISE(
@@ -311,7 +350,7 @@ class EventLedger:
                     );
                 END;
 
-                CREATE TRIGGER IF NOT EXISTS canonical_events_no_delete
+                CREATE TRIGGER canonical_events_no_delete
                 BEFORE DELETE ON canonical_events
                 BEGIN
                     SELECT RAISE(
@@ -320,10 +359,10 @@ class EventLedger:
                     );
                 END;
 
-                CREATE INDEX IF NOT EXISTS idx_event_type
+                CREATE INDEX idx_event_type
                     ON canonical_events(event_type);
 
-                CREATE INDEX IF NOT EXISTS idx_actor
+                CREATE INDEX idx_actor
                     ON canonical_events(actor_kind,actor_id);
                 """
             )
@@ -351,18 +390,32 @@ class EventLedger:
 
         trigger_rows = conn.execute(
             """
-            SELECT name
+            SELECT name, sql
             FROM sqlite_schema
             WHERE type='trigger'
+            ORDER BY name
             """
         ).fetchall()
         actual_triggers = {row["name"] for row in trigger_rows}
-        missing_triggers = self._REQUIRED_TRIGGERS - actual_triggers
-        if missing_triggers:
+        if actual_triggers != self._REQUIRED_TRIGGERS:
             raise IntegrityError(
-                "required append-only trigger missing: "
-                + ", ".join(sorted(missing_triggers))
+                "append-only trigger set drift: "
+                f"expected {sorted(self._REQUIRED_TRIGGERS)}, "
+                f"found {sorted(actual_triggers)}"
             )
+
+        def normalize_sql(sql: str | None) -> str:
+            return " ".join((sql or "").split()).rstrip(";").lower()
+
+        actual_trigger_sql = {
+            row["name"]: normalize_sql(row["sql"])
+            for row in trigger_rows
+        }
+        for name, expected_sql in self._EXPECTED_TRIGGER_SQL.items():
+            if actual_trigger_sql.get(name) != normalize_sql(expected_sql):
+                raise IntegrityError(
+                    f"append-only trigger definition drift: {name}"
+                )
 
         column_rows = conn.execute(
             "PRAGMA table_info(canonical_events)"
