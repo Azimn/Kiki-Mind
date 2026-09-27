@@ -442,12 +442,68 @@ class EventLedger:
         finally:
             conn.close()
 
-    def iter_events(self) -> Iterator[EventRecord]:
+    def get_event_by_sequence(
+        self,
+        sequence: int,
+    ) -> EventRecord | None:
         conn = self._connect()
         try:
-            rows = conn.execute(
-                "SELECT * FROM canonical_events ORDER BY sequence"
-            ).fetchall()
+            row = conn.execute(
+                """
+                SELECT *
+                FROM canonical_events
+                WHERE sequence=?
+                """,
+                (sequence,),
+            ).fetchone()
+            return _row_to_record(row) if row else None
+        finally:
+            conn.close()
+
+    def head(self) -> EventRecord | None:
+        conn = self._connect()
+        try:
+            row = conn.execute(
+                """
+                SELECT *
+                FROM canonical_events
+                ORDER BY sequence DESC
+                LIMIT 1
+                """
+            ).fetchone()
+            return _row_to_record(row) if row else None
+        finally:
+            conn.close()
+
+    def iter_events(
+        self,
+        *,
+        after_sequence: int = 0,
+        through_sequence: int | None = None,
+    ) -> Iterator[EventRecord]:
+        conn = self._connect()
+        try:
+            if through_sequence is None:
+                rows = conn.execute(
+                    """
+                    SELECT *
+                    FROM canonical_events
+                    WHERE sequence > ?
+                    ORDER BY sequence
+                    """,
+                    (after_sequence,),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    """
+                    SELECT *
+                    FROM canonical_events
+                    WHERE sequence > ?
+                      AND sequence <= ?
+                    ORDER BY sequence
+                    """,
+                    (after_sequence, through_sequence),
+                ).fetchall()
         finally:
             conn.close()
 
