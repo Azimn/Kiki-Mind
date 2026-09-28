@@ -1,3 +1,10 @@
+"""Disposable state for Kiki Mind, also known as the shadow brain on a leash.
+
+Projectors are allowed to summarize canonical history. They are not allowed to
+become history. If a projection cannot be deleted, replayed, and challenged,
+then it has gotten way too comfortable.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -579,6 +586,8 @@ class ProjectionRunner:
                 "projection checkpoint event hash mismatch"
             )
 
+    # The boring wall test: same ledger prefix, same projector, same state.
+    # Anything else means hidden state snuck into the dressing room.
     def _replay(self, through_sequence: int) -> dict[str, Any]:
         state = _normalize_state(self.projector.initial_state())
         for event in self.ledger.iter_events(
@@ -626,6 +635,7 @@ class ProjectionRunner:
             )
         return loaded
 
+    # Verified and current are different accessories. Never mix them up.
     def _verified_snapshot(
         self,
     ) -> tuple[ProjectionSnapshot, dict[str, Any]]:
@@ -782,6 +792,8 @@ class ProjectionRunner:
             )
         return state
 
+    # Repair rebuilds disposable state from history. It never repairs history
+    # from disposable state. That direction would be, like, catastrophically gross.
     def repair(self) -> dict[str, Any]:
         try:
             return self.current_verified()
