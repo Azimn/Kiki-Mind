@@ -1,3 +1,9 @@
+"""Traceable encounter indexing with no invented memories.
+
+Every row in this derived index has to be able to point back at the canonical
+events that earned it a place here. If there is no receipt, it does not get in.
+"""
+
 from __future__ import annotations
 
 from typing import Any, Mapping
@@ -6,7 +12,11 @@ from ..models import EventRecord, EventType
 
 
 class EncounterIndexProjectorV1:
-    """Deterministic encounter index over canonical encounter events."""
+    """Deterministic encounter index over canonical encounter events.
+
+    Think Rolodex, not autobiography: useful, reconstructible, and never allowed
+    to become a secret second life story.
+    """
 
     name = "encounter-index"
     version = "1"

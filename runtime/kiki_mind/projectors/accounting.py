@@ -1,3 +1,9 @@
+"""Aggressively boring accounting projector.
+
+Before Kiki gets anything resembling psychology, this module proves that the
+projection machinery can count receipts without becoming the diary.
+"""
+
 from __future__ import annotations
 
 from typing import Any, Mapping
@@ -6,7 +12,10 @@ from ..models import ClaimDomain, EventRecord, EventType
 
 
 class LedgerAccountingProjectorV1:
-    """Reference accounting projector for Implementation 002."""
+    """Reference accounting projector for Implementation 002.
+
+    It counts. It indexes. It does not have opinions. Honestly, iconic.
+    """
 
     name = "ledger-accounting"
     version = "1"
