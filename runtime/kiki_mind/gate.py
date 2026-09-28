@@ -1,3 +1,9 @@
+"""The Transition Gate, or: the velvet rope around canonical history.
+
+Being charming is not authorization. Being plausible is not provenance.
+Proposals get in only when the declared structure satisfies the constitution.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -76,12 +82,12 @@ def _parse_expiry(value: object) -> datetime | None:
 
 
 class TransitionGate:
-    """Deterministic structural gate.
+    """Deterministic structural gate with a very strict guest list.
 
-    Trust boundary: the gate can enforce consistency of declared ancestry and
-    DerivationMode, but it cannot prove that a proposer labeled semantic content
-    correctly. Proposal construction remains a trusted-input boundary and is
-    intentionally visible in the implementation spec.
+    The gate enforces declared ancestry, authority, taint, accounting, and
+    transition structure. It does not pretend to read minds or prove semantic
+    truth. Proposal construction remains a trusted-input boundary, because fake
+    certainty in a sequined dress is still fake certainty.
     """
 
     DERIVED_CLASSES = {
@@ -263,9 +269,8 @@ class TransitionGate:
                 f.append(GateFailure.TRANSITION_NOT_AUTHORIZED)
                 d.append("lease renewal must name the latest prior lease event")
 
-            # Deliberately allow both active renewal and post-expiry recovery by
-            # the same operator identity. This fixes ordinary lease lapse without
-            # inventing an operator-succession mechanism.
+            # Same operator, same velvet wristband. We allow active renewal and
+            # post-expiry recovery without quietly inventing succession semantics.
 
     def _lineage(self, p, ledger, f, d):
         if p.event_type != EventType.CANONICAL_ENDORSEMENT_AUTHORIZED:

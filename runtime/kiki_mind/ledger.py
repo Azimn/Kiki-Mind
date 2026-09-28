@@ -1,3 +1,10 @@
+"""Canonical history for Kiki Mind.
+
+This is the boring wall in the best possible sense. Events may accumulate,
+renderers may change, projections may catch fire in parachute pants, but
+canonical history remains append-only, attributable, and inspectable.
+"""
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -210,17 +217,18 @@ class _TxView:
         ).fetchone() is not None
 
 
+# Canonical means canonical. No shadow table gets promoted because it is handy.
 class EventLedger:
     """Append-only SQLite canonical event ledger.
 
-    The TransitionGate is owned by the ledger. Callers cannot substitute a
-    permissive gate per commit.
+    This is where the receipts live. The TransitionGate belongs to the ledger,
+    so callers cannot swap in a permissive bouncer when nobody is looking.
 
     SQLite itself is not treated as an adversarial security boundary. Raw SQL
     with direct file access can still bypass application semantics. On open, the
-    ledger verifies its schema and full hash chain; before each append it verifies
+    ledger verifies schema and the full hash chain; before each append it checks
     the current tail. A raw writer able to forge a fully consistent chain remains
-    outside the Implementation 001.1 threat model.
+    outside the Implementation 001.1 threat model. No fake invincibility claims.
     """
 
     _KNOWN_USER_TABLES = {"canonical_events"}
