@@ -72,6 +72,10 @@ class ProjectionStaleError(ProjectionError):
     pass
 
 
+class ProjectionUnsafeReadError(ProjectionError):
+    pass
+
+
 class Projector(Protocol):
     name: str
     version: str
@@ -293,10 +297,16 @@ class ProjectionStore:
             canonicality=row["canonicality"],
         )
 
-    def load(
+    def load_unverified(
         self,
         projector_name: str,
     ) -> ProjectionSnapshot | None:
+        """Read stored projection bytes without granting epistemic authority.
+
+        This validates storage shape, the disposable marker, and the state
+        checksum. It does NOT prove replay equivalence, freshness, or canonical
+        authority. Think fitting-room mirror, not passport.
+        """
         conn = self._connect()
         try:
             self._verify_schema_conn(conn)
@@ -313,6 +323,23 @@ class ProjectionStore:
             return self._row_to_snapshot(row)
         finally:
             conn.close()
+
+    def load(
+        self,
+        projector_name: str,
+    ) -> ProjectionSnapshot | None:
+        """Refuse ambiguous projection reads.
+
+        The old name was too easy to mistake for an authoritative state read.
+        Use load_unverified() for explicit storage inspection, or use a
+        ProjectionRunner verification method for state consumption.
+        """
+        raise ProjectionUnsafeReadError(
+            "ProjectionStore.load() is intentionally unsafe and disabled; "
+            "use load_unverified() for storage inspection, or "
+            "ProjectionRunner.checkpoint_verified()/current_verified() "
+            "for replay-verified state"
+        )
 
     def initialize(self, snapshot: ProjectionSnapshot) -> None:
         if snapshot.last_sequence != 0:
@@ -618,7 +645,7 @@ class ProjectionRunner:
         return first
 
     def _load_or_initialize(self) -> ProjectionSnapshot:
-        snapshot = self.store.load(self.projector.name)
+        snapshot = self.store.load_unverified(self.projector.name)
         if snapshot is not None:
             return snapshot
 
@@ -628,7 +655,7 @@ class ProjectionRunner:
             last_event_hash=GENESIS_HASH,
         )
         self.store.initialize(genesis)
-        loaded = self.store.load(self.projector.name)
+        loaded = self.store.load_unverified(self.projector.name)
         if loaded is None:
             raise ProjectionConflict(
                 "projection GENESIS initialization did not persist"
@@ -641,7 +668,7 @@ class ProjectionRunner:
     ) -> tuple[ProjectionSnapshot, dict[str, Any]]:
         self.ledger.verify_schema()
         self.ledger.verify_integrity()
-        snapshot = self.store.load(self.projector.name)
+        snapshot = self.store.load_unverified(self.projector.name)
         if snapshot is None:
             raise ProjectionCheckpointMismatch(
                 "projection has not been built"
@@ -727,7 +754,7 @@ class ProjectionRunner:
             )
             snapshot = next_snapshot
 
-        saved = self.store.load(self.projector.name)
+        saved = self.store.load_unverified(self.projector.name)
         if saved is None:
             raise ProjectionConflict(
                 "projection disappeared during run"
@@ -774,7 +801,7 @@ class ProjectionRunner:
             last_event_hash=event_hash,
         )
         self.store.replace(snapshot)
-        saved = self.store.load(self.projector.name)
+        saved = self.store.load_unverified(self.projector.name)
         if saved is None:
             raise ProjectionConflict(
                 "projection disappeared during rebuild"

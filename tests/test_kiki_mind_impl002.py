@@ -38,6 +38,7 @@ from runtime.kiki_mind.projection import (
     ProjectionStore,
     ProjectionStoreSeparationError,
     ProjectionStaleError,
+    ProjectionUnsafeReadError,
     ProjectionVersionMismatch,
 )
 from runtime.kiki_mind.projectors.accounting import (
@@ -129,7 +130,7 @@ class KikiMindImplementation002Tests(unittest.TestCase):
     def test_explicit_genesis_projection(self):
         runner = self.accounting_runner()
         state = runner.run()
-        snapshot = runner.store.load("ledger-accounting")
+        snapshot = runner.store.load_unverified("ledger-accounting")
 
         self.assertEqual(state["event_count"], 0)
         self.assertEqual(snapshot.last_sequence, 0)
@@ -421,6 +422,26 @@ class KikiMindImplementation002Tests(unittest.TestCase):
                 LedgerAccountingProjectorV1(),
             )
 
+    def test_ambiguous_store_load_is_refused(self):
+        store = ProjectionStore(self.proj)
+
+        with self.assertRaises(ProjectionUnsafeReadError):
+            store.load("ledger-accounting")
+
+    def test_unverified_store_read_names_its_weaker_contract(self):
+        self.evidence("a")
+        runner = self.accounting_runner()
+        runner.run()
+
+        snapshot = runner.store.load_unverified("ledger-accounting")
+
+        self.assertEqual(snapshot.last_sequence, 1)
+        self.assertEqual(snapshot.state["event_count"], 1)
+        self.assertEqual(
+            runner.current_verified()["event_count"],
+            1,
+        )
+
     def test_unknown_projection_table_is_rejected(self):
         ProjectionStore(self.proj)
         conn = sqlite3.connect(self.proj)
@@ -447,7 +468,7 @@ class KikiMindImplementation002Tests(unittest.TestCase):
         ):
             runner.run()
 
-        snapshot = ProjectionStore(self.proj).load(
+        snapshot = ProjectionStore(self.proj).load_unverified(
             "ledger-accounting"
         )
         self.assertEqual(snapshot.last_sequence, 0)
@@ -457,7 +478,7 @@ class KikiMindImplementation002Tests(unittest.TestCase):
         self.evidence("a")
         runner = self.accounting_runner()
         runner.run()
-        stale = runner.store.load("ledger-accounting")
+        stale = runner.store.load_unverified("ledger-accounting")
 
         self.evidence("b")
         runner.run()
@@ -570,7 +591,7 @@ class KikiMindImplementation002Tests(unittest.TestCase):
         )
         runner.run()
 
-        snapshot = runner.store.load("encounter-index")
+        snapshot = runner.store.load_unverified("encounter-index")
         invented = dict(snapshot.state)
         invented["entries"] = dict(invented["entries"])
         invented["entries"]["fake"] = {

@@ -50,3 +50,16 @@ A default `run()` or `rebuild()` now rechecks the canonical ledger head before r
 Explicit historical-prefix operations using `through_sequence` retain checkpoint semantics and do not claim to be current.
 
 See `KIKI_MIND_v0.2.2_IMPLEMENTATION_002.2_REVIEW_PATCH.md`.
+
+
+## Implementation 002.3 unverified-read hardening
+
+A storage read is not a verified state read.
+
+`ProjectionStore.load_unverified()` now names the deliberately weaker operation: it validates the projection schema, disposable-state marker, JSON shape, and stored checksum, but it does not prove replay equivalence or freshness.
+
+The old ambiguous `ProjectionStore.load()` path is retained only as a fail-closed trap and raises `ProjectionUnsafeReadError`. Consumers must choose either explicit low-level inspection or a `ProjectionRunner` verification method.
+
+This prevents convenience from quietly becoming authority. The shadow brain may be inspected. It does not get a fake passport because somebody liked the short method name.
+
+See `KIKI_MIND_v0.2.2_IMPLEMENTATION_002.3_REVIEW_PATCH.md`.
