@@ -3,9 +3,9 @@
 **Internal review status:** complete through Implementation 002.7  
 **Latest code-bearing head:** `691e9cade39c3e92c4d0f5c3e486eb66a9cca963`  
 **Latest code-bearing CI:** 60/60 tests passed  
-**External hostile review:** still required  
-**Merge status:** do not merge yet  
-**Implementation 003:** still gated
+**External hostile review:** satisfied by Calibos, 2026-09-28  
+**Merge status:** merged to `main` as `dddcd938887085e4df34e5279be009f865a0cf44`  
+**Implementation 003:** unblocked from the 002 review side
 
 ## Review question
 
@@ -176,24 +176,27 @@ The remaining weaknesses are not being relabeled as solved problems.
 
 Projector purity, direct filesystem adversaries, point-in-time freshness, fingerprint limitations, and long-run verification cost are explicit boundaries.
 
-That is enough for internal Implementation 002 review.
+That was enough for internal Implementation 002 review.
 
-It is not enough to merge.
+## External gate result
 
-## External gate
+Calibos completed twelve hostile probes against the reviewed stack and reported no blocking wounds.
 
-Calibos should attack the actual current code at the latest branch head.
+The external review independently confirmed the fingerprint, unverified-read, forged-state, rebuild-race, physical-file-separation, repair, and schema defenses.
 
-The review should especially challenge:
+Calibos also reproduced the declared fingerprint collision boundary using closure state and confirmed that replay divergence, not the fingerprint label, remained the authority-bearing guard.
 
-- trusted-projector purity assumptions;
-- any remaining path from unverified storage to authority;
-- rebuild races;
-- schema or fingerprint laundering;
-- direct low-level API misuse;
-- scaling pressure that could incentivize bypassing replay.
+Three non-blocking notes remain on the record:
 
-Implementation 003 remains design-only until that review returns.
+1. `repair()` on a stale-but-valid projection raises `ProjectionStaleError` rather than catching up. This is honest but should remain clearly documented because the method name can suggest broader healing.
+2. `EventLedger(path, verify_on_open=False)` followed by `commit()` verifies the tail rather than forcing a one-time full-chain verification. This is outside the current raw-filesystem threat model, but a one-time pre-commit full verification is reasonable defense-in-depth.
+3. Any future read path that grants authority without replay equivalence is a regression. Long-run replay cost must not become an excuse to make disposable state indispensable.
+
+External review evidence is preserved under `research/reviews/2026-09-28_calibos_impl002_external_review.md`.
+
+Implementation 002 is accepted and merged.
+
+Implementation 003 is unblocked from the review side.
 
 The shadow brain can wear the leather jacket.
 

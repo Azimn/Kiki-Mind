@@ -22,21 +22,23 @@ Boring state comes before clever cognition. Accounting, replay, corruption detec
 
 ## Current implementation
 
-The active development branch for Implementation 002 is `kiki/impl-0012-002-state-projectors`.
+Implementation 002 is merged on `main`.
 
 Implementation 001.2 hardens canonical trigger verification.
 
 Implementation 002 introduces deterministic, versioned, physically separate projection state.
 
-Implementation 002.1 distinguishes checkpoint-valid state from state verified current at canonical ledger head.
+Implementations 002.1 through 002.7 harden freshness, unverified reads, process-stable fingerprints, physical file separation, exact projection schema verification, and the supported consumer API.
 
-Implementation 002.2 rejects default catch-up results that become stale during projection.
+Calibos completed the external hostile review with twelve probes and reported no blocking wounds.
 
-The hostile-review question remains:
+The hostile-review question was:
 
 > **Where can the shadow brain become the real brain?**
 
-Implementation 003 stays gated until that question has been attacked hard enough to be boring.
+The external gate is satisfied. Implementation 003 is now unblocked.
+
+The candidate next layer is the Developmental Evidence Layer under `research/design/`, where observations are canonical and psychological meaning remains derived.
 
 ## Repository voice
 

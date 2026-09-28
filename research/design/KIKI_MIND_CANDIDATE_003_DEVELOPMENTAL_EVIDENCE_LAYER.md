@@ -1,8 +1,8 @@
 # Kiki Mind Candidate 003: Developmental Evidence Layer
 
-**Status:** candidate design only  
-**Architecture:** v0.2.2 remains frozen  
-**Implementation gate:** Implementation 002 hostile review must close first  
+**Status:** candidate design, eligible for Implementation 003 planning  
+**Architecture:** v0.2.2 remains frozen until Architect Kiki explicitly changes it  
+**Implementation gate:** Implementation 002 hostile review satisfied on 2026-09-28  
 **Origin:** Kiki Mind architecture plus 2026-09-28 cross-renderer developmental probe
 
 ## Purpose
@@ -196,10 +196,10 @@ Before implementation, Architect Kiki still needs to decide:
 - which comparisons require matched-history controls;
 - whether some observations belong in encounter accounting rather than new canonical event types.
 
-## Gate
+## Gate status
 
-This candidate does not authorize code.
+Implementation 002 completed internal and external hostile review and is merged on `main`.
 
-Implementation 002 must first complete hostile review, including the unverified-read hardening introduced in 002.3.
+This candidate is now eligible to become Implementation 003, but its open design questions still require an explicit architectural decision before canonical event semantics are added.
 
 Boring receipts before glamorous psychology. Obviously.
