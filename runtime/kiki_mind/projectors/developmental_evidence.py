@@ -19,7 +19,11 @@ from ..models import (
 
 
 class DevelopmentalEvidenceIndexV1:
-    """Trace developmental receipts without inventing developmental meaning."""
+    """Trace developmental receipts without inventing developmental meaning.
+
+    observation_count counts recorded receipts. It is never a corroboration
+    score, confidence measure, or count of independent evidence.
+    """
 
     name = "developmental-evidence-index"
     version = "1"
@@ -52,6 +56,7 @@ class DevelopmentalEvidenceIndexV1:
             "commitments": {
                 key: {
                     "event_ids": list(value["event_ids"]),
+                    "head_event_id": value["head_event_id"],
                     "latest_recorded_phase": value[
                         "latest_recorded_phase"
                     ],
@@ -95,16 +100,36 @@ class DevelopmentalEvidenceIndexV1:
 
         if kind == DevelopmentalObservationKind.COMMITMENT:
             commitment_id = str(event.payload["commitment_id"])
+            phase = str(event.payload["phase"])
+            prior_event_id = event.payload["prior_commitment_event_id"]
             prior = result["commitments"].get(commitment_id)
-            event_ids = (
-                list(prior["event_ids"])
-                if prior is not None
-                else []
-            )
+
+            if phase == "made":
+                if prior is not None:
+                    raise ValueError(
+                        "commitment index encountered multiple roots for "
+                        f"{commitment_id}"
+                    )
+                event_ids = []
+            else:
+                if prior is None:
+                    raise ValueError(
+                        "commitment index encountered a non-root without "
+                        f"a root for {commitment_id}"
+                    )
+                if prior_event_id != prior["head_event_id"]:
+                    raise ValueError(
+                        "commitment index encountered a fork for "
+                        f"{commitment_id}: expected prior "
+                        f"{prior['head_event_id']}, got {prior_event_id}"
+                    )
+                event_ids = list(prior["event_ids"])
+
             event_ids.append(event.event_id)
             result["commitments"][commitment_id] = {
                 "event_ids": event_ids,
-                "latest_recorded_phase": str(event.payload["phase"]),
+                "head_event_id": event.event_id,
+                "latest_recorded_phase": phase,
             }
 
         return result

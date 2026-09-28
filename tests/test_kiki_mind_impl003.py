@@ -781,6 +781,10 @@ class KikiMindImplementation003Tests(unittest.TestCase):
             "fulfilled",
         )
         self.assertEqual(len(commitment["event_ids"]), 2)
+        self.assertEqual(
+            commitment["head_event_id"],
+            commitment["event_ids"][-1],
+        )
         self.assertNotIn("reliability_score", commitment)
         self.assertNotIn("maturity", commitment)
 
