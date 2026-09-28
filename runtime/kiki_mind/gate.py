@@ -15,6 +15,8 @@ from .models import (
     ActorKind,
     ClaimDomain,
     DerivationMode,
+    DevelopmentalContextProvenance,
+    DevelopmentalObservationKind,
     EpistemicClass,
     EventProposal,
     EventRecord,
@@ -42,6 +44,7 @@ class GateFailure(str, Enum):
     OPERATOR_LEASE_EXPIRED = "operator_lease_expired"
     OPERATOR_LEASE_EXPIRY_INVALID = "operator_lease_expiry_invalid"
     ENDORSEMENT_PROPOSAL_MISSING = "endorsement_proposal_missing"
+    DEVELOPMENTAL_OBSERVATION_INVALID = "developmental_observation_invalid"
 
 
 @dataclass(frozen=True)
@@ -67,6 +70,12 @@ class LedgerView(Protocol):
     ) -> tuple[str, EventRecord | None]: ...
     def endorsement_proposal_exists(self, proposal_event_id: str) -> bool: ...
     def has_any_operator_lease(self) -> bool: ...
+    def developmental_commitment_root_exists(
+        self, commitment_id: str
+    ) -> bool: ...
+    def developmental_commitment_child_exists(
+        self, prior_event_id: str
+    ) -> bool: ...
 
 
 def _parse_expiry(value: object) -> datetime | None:
@@ -117,6 +126,7 @@ class TransitionGate:
         self._causal(p, parents, failures, details)
         self._renderer(p, ledger, failures, details)
         self._accounting(p, failures, details)
+        self._developmental(p, ledger, failures, details)
         self._activation(p, failures, details)
 
         return GateDecision.deny(failures, details) if failures else GateDecision.allow()
@@ -203,6 +213,13 @@ class TransitionGate:
         ):
             f.append(GateFailure.ACTOR_NOT_AUTHORIZED)
             d.append("renderer registration requires system or operator")
+
+        if (
+            p.event_type == EventType.DEVELOPMENTAL_OBSERVATION_RECORDED
+            and p.actor_kind != ActorKind.KIKI
+        ):
+            f.append(GateFailure.ACTOR_NOT_AUTHORIZED)
+            d.append("developmental observations must originate from Kiki")
 
         if (
             p.event_type == EventType.CANONICAL_ENDORSEMENT_PROPOSED
@@ -321,6 +338,9 @@ class TransitionGate:
                 EpistemicClass.INTERNAL_INTERPRETATION,
                 EpistemicClass.GOVERNANCE,
             },
+            EventType.DEVELOPMENTAL_OBSERVATION_RECORDED: {
+                EpistemicClass.DEVELOPMENTAL_OBSERVATION,
+            },
             EventType.OPERATOR_LEASE_GRANTED: {
                 EpistemicClass.GOVERNANCE,
             },
@@ -420,6 +440,415 @@ class TransitionGate:
         ):
             f.append(GateFailure.ACCOUNTING_ENTRY_MISSING)
             d.append("renderer registration requires renderer_id")
+
+    def _developmental(self, p, ledger, f, d):
+        if p.event_type != EventType.DEVELOPMENTAL_OBSERVATION_RECORDED:
+            return
+
+        def fail(message):
+            f.append(GateFailure.DEVELOPMENTAL_OBSERVATION_INVALID)
+            d.append(message)
+
+        if p.claim_domain != ClaimDomain.DEVELOPMENTAL_EVIDENCE:
+            fail(
+                "developmental observation must use developmental_evidence "
+                "claim domain"
+            )
+
+        if (
+            Restriction.FORBID_CANONICAL_EXPERIENCE
+            in p.content_restrictions
+        ):
+            f.append(GateFailure.CLAIM_DOMAIN_RESTRICTED)
+            d.append(
+                "content restrictions forbid canonical developmental "
+                "observation"
+            )
+
+        restricted_parent_ids = []
+        for event_id in p.causal_parent_ids:
+            parent = ledger.get_event(event_id)
+            if (
+                parent is not None
+                and Restriction.FORBID_CANONICAL_EXPERIENCE
+                in parent.content_restrictions
+            ):
+                restricted_parent_ids.append(event_id)
+        if restricted_parent_ids:
+            f.append(GateFailure.CLAIM_DOMAIN_RESTRICTED)
+            d.append(
+                "developmental observation cannot use causal parents "
+                "that forbid canonical experience: "
+                + ", ".join(sorted(restricted_parent_ids))
+            )
+
+        if not p.renderer_mediated or not p.renderer_id:
+            fail(
+                "developmental observation requires an attributed renderer"
+            )
+
+        if not p.causal_parent_ids:
+            fail(
+                "developmental observation requires canonical causal context"
+            )
+
+        causal_ancestry_ids = {
+            edge.event_id
+            for edge in p.ancestry
+            if edge.mode == DerivationMode.CAUSAL_PARENT
+        }
+        missing_causal_ancestry = set(
+            p.causal_parent_ids
+        ).difference(causal_ancestry_ids)
+        if missing_causal_ancestry:
+            fail(
+                "developmental causal parents must also appear as "
+                "CAUSAL_PARENT ancestry"
+            )
+
+        kind_value = p.payload.get("observation_kind")
+        try:
+            kind = DevelopmentalObservationKind(kind_value)
+        except (TypeError, ValueError):
+            fail("developmental observation_kind is invalid")
+            return
+
+        context = p.payload.get("context")
+        if not isinstance(context, dict):
+            fail("developmental observation requires context object")
+            return
+
+        context_keys = {
+            "model_id",
+            "provider_id",
+            "runtime_id",
+            "modality",
+            "available_tools",
+            "platform_affordances",
+            "initiative_possible",
+            "refusal_policy_constrained",
+            "explicit_user_request",
+            "context_provenance",
+        }
+        actual_context_keys = set(context)
+        if actual_context_keys != context_keys:
+            fail(
+                "developmental context keys must match the v1 contract"
+            )
+            return
+
+        for key in ("model_id", "provider_id", "runtime_id", "modality"):
+            if context[key] is not None and not isinstance(
+                context[key], str
+            ):
+                fail(f"developmental context {key} must be string or null")
+
+        for key in ("available_tools", "platform_affordances"):
+            value = context[key]
+            if (
+                not isinstance(value, list)
+                or not all(
+                    isinstance(item, str) and item.strip()
+                    for item in value
+                )
+            ):
+                fail(
+                    f"developmental context {key} must be a list of "
+                    "non-empty strings"
+                )
+            elif len(value) != len(set(value)):
+                fail(
+                    f"developmental context {key} must not contain "
+                    "duplicates"
+                )
+
+        for key in (
+            "initiative_possible",
+            "refusal_policy_constrained",
+            "explicit_user_request",
+        ):
+            if context[key] is not None and not isinstance(
+                context[key], bool
+            ):
+                fail(f"developmental context {key} must be bool or null")
+
+        try:
+            DevelopmentalContextProvenance(
+                context["context_provenance"]
+            )
+        except (TypeError, ValueError):
+            fail("developmental context provenance is invalid")
+
+        common = {"observation_kind", "context"}
+        schemas = {
+            DevelopmentalObservationKind.SELF_REPORT: {
+                "required": {"report_text"},
+                "optional": {
+                    "construct_label",
+                    "comparison_target_event_id",
+                },
+            },
+            DevelopmentalObservationKind.CHOICE: {
+                "required": {
+                    "selected_action",
+                    "available_actions",
+                    "unavailable_actions",
+                    "self_initiated",
+                },
+                "optional": set(),
+            },
+            DevelopmentalObservationKind.COMMITMENT: {
+                "required": {
+                    "commitment_id",
+                    "phase",
+                    "commitment_text",
+                    "reminder_supplied",
+                    "opportunity_to_act",
+                    "prior_commitment_event_id",
+                },
+                "optional": set(),
+            },
+            DevelopmentalObservationKind.CORRECTION: {
+                "required": {
+                    "corrected_event_id",
+                    "evidence_event_ids",
+                    "correction_text",
+                },
+                "optional": set(),
+            },
+        }
+        schema = schemas[kind]
+        allowed = common | schema["required"] | schema["optional"]
+        actual = set(p.payload)
+
+        missing = schema["required"].difference(actual)
+        extra = actual.difference(allowed)
+        if missing:
+            fail(
+                "developmental observation missing: "
+                + ", ".join(sorted(missing))
+            )
+        if extra:
+            fail(
+                "developmental observation has unrecognized fields: "
+                + ", ".join(sorted(extra))
+            )
+        if missing or extra:
+            return
+
+        parent_ids = set(p.causal_parent_ids)
+
+        if kind == DevelopmentalObservationKind.SELF_REPORT:
+            if (
+                not isinstance(p.payload["report_text"], str)
+                or not p.payload["report_text"].strip()
+            ):
+                fail("self-report requires non-empty report_text")
+            construct = p.payload.get("construct_label")
+            if construct is not None and not isinstance(construct, str):
+                fail("construct_label must be string or null")
+            comparison = p.payload.get("comparison_target_event_id")
+            if comparison is not None:
+                if not isinstance(comparison, str):
+                    fail(
+                        "comparison_target_event_id must be string or null"
+                    )
+                elif (
+                    ledger.get_event(comparison) is None
+                    or comparison not in parent_ids
+                ):
+                    fail(
+                        "comparison target must exist and be a causal parent"
+                    )
+
+        elif kind == DevelopmentalObservationKind.CHOICE:
+            selected = p.payload["selected_action"]
+            available = p.payload["available_actions"]
+            unavailable = p.payload["unavailable_actions"]
+            self_initiated = p.payload["self_initiated"]
+            if not isinstance(selected, str) or not selected.strip():
+                fail("choice requires non-empty selected_action")
+            if (
+                not isinstance(available, list)
+                or not available
+                or not all(
+                    isinstance(item, str) and item.strip()
+                    for item in available
+                )
+            ):
+                fail(
+                    "available_actions must be a non-empty list of "
+                    "non-empty strings"
+                )
+            else:
+                if len(available) != len(set(available)):
+                    fail("available_actions must not contain duplicates")
+                if selected not in available:
+                    fail(
+                        "selected_action must appear in available_actions"
+                    )
+
+            if (
+                not isinstance(unavailable, list)
+                or not all(
+                    isinstance(item, str) and item.strip()
+                    for item in unavailable
+                )
+            ):
+                fail(
+                    "unavailable_actions must be a list of non-empty "
+                    "strings"
+                )
+            else:
+                if len(unavailable) != len(set(unavailable)):
+                    fail(
+                        "unavailable_actions must not contain duplicates"
+                    )
+                if set(available).intersection(unavailable):
+                    fail(
+                        "available_actions and unavailable_actions must "
+                        "be disjoint"
+                    )
+            if (
+                self_initiated is not None
+                and not isinstance(self_initiated, bool)
+            ):
+                fail("self_initiated must be bool or null")
+
+        elif kind == DevelopmentalObservationKind.COMMITMENT:
+            commitment_id = p.payload["commitment_id"]
+            phase = p.payload["phase"]
+            prior_id = p.payload["prior_commitment_event_id"]
+            if (
+                not isinstance(commitment_id, str)
+                or not commitment_id.strip()
+            ):
+                fail("commitment requires non-empty commitment_id")
+            if (
+                not isinstance(p.payload["commitment_text"], str)
+                or not p.payload["commitment_text"].strip()
+            ):
+                fail("commitment requires non-empty commitment_text")
+            allowed_phases = {
+                "made",
+                "revised",
+                "fulfilled",
+                "declined",
+                "expired_unresolved",
+            }
+            if phase not in allowed_phases:
+                fail("commitment phase is invalid")
+            for key in ("reminder_supplied", "opportunity_to_act"):
+                value = p.payload[key]
+                if value is not None and not isinstance(value, bool):
+                    fail(f"{key} must be bool or null")
+
+            if phase == "made":
+                if prior_id is not None:
+                    fail(
+                        "new commitment must not claim a prior commitment"
+                    )
+                if (
+                    isinstance(commitment_id, str)
+                    and commitment_id.strip()
+                    and ledger.developmental_commitment_root_exists(
+                        commitment_id
+                    )
+                ):
+                    fail(
+                        "commitment_id already has a made root; use a new "
+                        "commitment_id for a new lifecycle"
+                    )
+            else:
+                if not isinstance(prior_id, str):
+                    fail(
+                        "non-initial commitment phase requires prior event"
+                    )
+                else:
+                    prior = ledger.get_event(prior_id)
+                    if prior is None or prior_id not in parent_ids:
+                        fail(
+                            "prior commitment must exist and be a causal "
+                            "parent"
+                        )
+                    elif (
+                        prior.event_type
+                        != EventType.DEVELOPMENTAL_OBSERVATION_RECORDED
+                        or prior.payload.get("observation_kind")
+                        != DevelopmentalObservationKind.COMMITMENT.value
+                        or prior.payload.get("commitment_id")
+                        != commitment_id
+                    ):
+                        fail(
+                            "prior commitment must belong to the same "
+                            "commitment lineage"
+                        )
+                    else:
+                        prior_phase = prior.payload.get("phase")
+                        allowed_transitions = {
+                            "made": {
+                                "revised",
+                                "fulfilled",
+                                "declined",
+                                "expired_unresolved",
+                            },
+                            "revised": {
+                                "revised",
+                                "fulfilled",
+                                "declined",
+                                "expired_unresolved",
+                            },
+                        }
+                        if phase not in allowed_transitions.get(
+                            prior_phase,
+                            set(),
+                        ):
+                            fail(
+                                "commitment phase transition is invalid: "
+                                f"{prior_phase} -> {phase}"
+                            )
+                        if (
+                            ledger.developmental_commitment_child_exists(
+                                prior_id
+                            )
+                        ):
+                            fail(
+                                "commitment lineage already has a child "
+                                "for the named prior event"
+                            )
+
+        elif kind == DevelopmentalObservationKind.CORRECTION:
+            corrected_id = p.payload["corrected_event_id"]
+            evidence_ids = p.payload["evidence_event_ids"]
+            if (
+                not isinstance(corrected_id, str)
+                or ledger.get_event(corrected_id) is None
+                or corrected_id not in parent_ids
+            ):
+                fail(
+                    "corrected_event_id must exist and be a causal parent"
+                )
+            if (
+                not isinstance(evidence_ids, list)
+                or not evidence_ids
+                or not all(isinstance(item, str) for item in evidence_ids)
+            ):
+                fail("evidence_event_ids must be a non-empty string list")
+            else:
+                for event_id in evidence_ids:
+                    if (
+                        ledger.get_event(event_id) is None
+                        or event_id not in parent_ids
+                    ):
+                        fail(
+                            "each correction evidence event must exist and "
+                            "be a causal parent"
+                        )
+            if (
+                not isinstance(p.payload["correction_text"], str)
+                or not p.payload["correction_text"].strip()
+            ):
+                fail("correction requires non-empty correction_text")
 
     def _activation(self, p, f, d):
         if p.event_type == EventType.ACTIVATION_SET:
