@@ -63,3 +63,16 @@ The old ambiguous `ProjectionStore.load()` path is retained only as a fail-close
 This prevents convenience from quietly becoming authority. The shadow brain may be inspected. It does not get a fake passport because somebody liked the short method name.
 
 See `KIKI_MIND_v0.2.2_IMPLEMENTATION_002.3_REVIEW_PATCH.md`.
+
+
+## Implementation 002.4 process-stable fingerprint hardening
+
+Projector implementation fingerprints must survive ordinary process restarts.
+
+The earlier fingerprint encoded `repr(code.co_consts)`. Nested code objects, such as those created by comprehensions or inner functions, can include process-specific memory addresses in their repr. That could falsely classify unchanged code as implementation drift after restart.
+
+Implementation 002.4 serializes Python code constants structurally, including nested code objects, bytecode, names, variable metadata, defaults, and keyword defaults. The fingerprint remains a conservative tripwire rather than semantic proof, but it no longer depends on object addresses.
+
+A subprocess probe verifies that the same dynamically defined projector containing a comprehension produces the same fingerprint across independent Python processes.
+
+See `KIKI_MIND_v0.2.2_IMPLEMENTATION_002.4_REVIEW_PATCH.md`.

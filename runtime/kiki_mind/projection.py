@@ -14,6 +14,7 @@ import inspect
 import json
 from pathlib import Path
 import sqlite3
+from types import CodeType
 from typing import Any, Mapping, Protocol
 
 from .ledger import EventLedger
@@ -134,14 +135,82 @@ def _state_hash(state: Mapping[str, Any]) -> str:
     ).hexdigest()
 
 
-def _method_material(method: Any) -> dict[str, Any]:
-    code = getattr(method, "__code__", None)
-    if code is None:
-        return {"repr": repr(method)}
+def _constant_material(value: Any) -> Any:
+    """Serialize Python code constants without process-specific repr noise."""
+    if value is None:
+        return {"type": "none"}
+    if value is Ellipsis:
+        return {"type": "ellipsis"}
+    if isinstance(value, bool):
+        return {"type": "bool", "value": value}
+    if isinstance(value, int):
+        return {"type": "int", "value": value}
+    if isinstance(value, float):
+        return {"type": "float", "value": value}
+    if isinstance(value, complex):
+        return {
+            "type": "complex",
+            "real": value.real,
+            "imag": value.imag,
+        }
+    if isinstance(value, str):
+        return {"type": "str", "value": value}
+    if isinstance(value, bytes):
+        return {"type": "bytes", "hex": value.hex()}
+    if isinstance(value, tuple):
+        return {
+            "type": "tuple",
+            "items": [_constant_material(item) for item in value],
+        }
+    if isinstance(value, frozenset):
+        items = [_constant_material(item) for item in value]
+        return {
+            "type": "frozenset",
+            "items": sorted(items, key=_canonical_json),
+        }
+    if isinstance(value, CodeType):
+        return {
+            "type": "code",
+            "argcount": value.co_argcount,
+            "posonlyargcount": value.co_posonlyargcount,
+            "kwonlyargcount": value.co_kwonlyargcount,
+            "nlocals": value.co_nlocals,
+            "stacksize": value.co_stacksize,
+            "flags": value.co_flags,
+            "bytecode": value.co_code.hex(),
+            "constants": [
+                _constant_material(item) for item in value.co_consts
+            ],
+            "names": list(value.co_names),
+            "varnames": list(value.co_varnames),
+            "freevars": list(value.co_freevars),
+            "cellvars": list(value.co_cellvars),
+        }
     return {
-        "bytecode": code.co_code.hex(),
-        "constants": repr(code.co_consts),
-        "names": list(code.co_names),
+        "type": f"{type(value).__module__}.{type(value).__qualname__}",
+        "repr": repr(value),
+    }
+
+
+def _method_material(method: Any) -> dict[str, Any]:
+    function = getattr(method, "__func__", method)
+    code = getattr(function, "__code__", None)
+    if code is None:
+        return {"repr": repr(function)}
+
+    defaults = getattr(function, "__defaults__", None)
+    kwdefaults = getattr(function, "__kwdefaults__", None)
+    return {
+        "code": _constant_material(code),
+        "defaults": _constant_material(defaults),
+        "kwdefaults": (
+            {
+                key: _constant_material(value)
+                for key, value in sorted(kwdefaults.items())
+            }
+            if kwdefaults
+            else None
+        ),
     }
 
 

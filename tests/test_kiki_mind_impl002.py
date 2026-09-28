@@ -11,7 +11,10 @@ import hashlib
 import json
 from pathlib import Path
 import sqlite3
+import subprocess
+import sys
 import tempfile
+import textwrap
 import unittest
 
 from runtime.kiki_mind.ledger import EventLedger
@@ -276,6 +279,37 @@ class KikiMindImplementation002Tests(unittest.TestCase):
         )
         with self.assertRaises(ProjectionVersionMismatch):
             runner.run()
+
+    def test_projector_fingerprint_is_stable_across_processes(self):
+        script = textwrap.dedent(
+            """
+            from runtime.kiki_mind.projection import projector_fingerprint
+
+            class NestedProjector:
+                name = "nested"
+                version = "1"
+
+                def initial_state(self):
+                    return {"items": []}
+
+                def apply(self, state, event):
+                    values = [x + 1 for x in (1, 2, 3)]
+                    return {"items": values}
+
+            print(projector_fingerprint(NestedProjector()))
+            """
+        )
+
+        first = subprocess.check_output(
+            [sys.executable, "-c", script],
+            text=True,
+        ).strip()
+        second = subprocess.check_output(
+            [sys.executable, "-c", script],
+            text=True,
+        ).strip()
+
+        self.assertEqual(first, second)
 
     def test_same_version_implementation_drift_is_rejected(self):
         self.evidence("a")
