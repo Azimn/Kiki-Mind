@@ -178,7 +178,7 @@ class KikiMindImplementation003Tests(unittest.TestCase):
             DevelopmentalObservationKind.SELF_REPORT.value,
         )
         self.assertNotIn("report_text", entry)
-        self.assertNotIn("strength", entry)
+        self.assertNotIn("construct_label", entry)
         self.assertNotIn("confidence", entry)
 
     def test_causal_parents_must_also_be_causal_ancestry(self):
@@ -260,6 +260,58 @@ class KikiMindImplementation003Tests(unittest.TestCase):
                 payload={
                     "report_text": "I feel stronger",
                     "confidence_score": 0.92,
+                },
+            )
+
+    def test_context_lists_reject_duplicates_and_empty_labels(self):
+        parent = self.source()
+
+        duplicate_context = self.context()
+        duplicate_context["available_tools"] = ["repo", "repo"]
+        with self.assertRaises(GateRejected):
+            self.observation(
+                parent,
+                payload={
+                    "report_text": "I feel fine.",
+                    "context": duplicate_context,
+                },
+            )
+
+        empty_context = self.context()
+        empty_context["platform_affordances"] = [""]
+        with self.assertRaises(GateRejected):
+            self.observation(
+                parent,
+                payload={
+                    "report_text": "I feel fine.",
+                    "context": empty_context,
+                },
+            )
+
+    def test_choice_opportunity_sets_are_consistent(self):
+        parent = self.source()
+
+        with self.assertRaises(GateRejected):
+            self.observation(
+                parent,
+                kind=DevelopmentalObservationKind.CHOICE,
+                payload={
+                    "selected_action": "continue",
+                    "available_actions": ["continue", "continue"],
+                    "unavailable_actions": [],
+                    "self_initiated": True,
+                },
+            )
+
+        with self.assertRaises(GateRejected):
+            self.observation(
+                parent,
+                kind=DevelopmentalObservationKind.CHOICE,
+                payload={
+                    "selected_action": "continue",
+                    "available_actions": ["continue", "stop"],
+                    "unavailable_actions": ["stop"],
+                    "self_initiated": True,
                 },
             )
 

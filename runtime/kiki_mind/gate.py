@@ -522,9 +522,20 @@ class TransitionGate:
             value = context[key]
             if (
                 not isinstance(value, list)
-                or not all(isinstance(item, str) for item in value)
+                or not all(
+                    isinstance(item, str) and item.strip()
+                    for item in value
+                )
             ):
-                fail(f"developmental context {key} must be a string list")
+                fail(
+                    f"developmental context {key} must be a list of "
+                    "non-empty strings"
+                )
+            elif len(value) != len(set(value)):
+                fail(
+                    f"developmental context {key} must not contain "
+                    "duplicates"
+                )
 
         for key in (
             "initiative_possible",
@@ -628,18 +639,44 @@ class TransitionGate:
             if (
                 not isinstance(available, list)
                 or not available
-                or not all(isinstance(item, str) for item in available)
+                or not all(
+                    isinstance(item, str) and item.strip()
+                    for item in available
+                )
             ):
-                fail("available_actions must be a non-empty string list")
-            elif selected not in available:
-                fail("selected_action must appear in available_actions")
+                fail(
+                    "available_actions must be a non-empty list of "
+                    "non-empty strings"
+                )
+            else:
+                if len(available) != len(set(available)):
+                    fail("available_actions must not contain duplicates")
+                if selected not in available:
+                    fail(
+                        "selected_action must appear in available_actions"
+                    )
+
             if (
                 not isinstance(unavailable, list)
                 or not all(
-                    isinstance(item, str) for item in unavailable
+                    isinstance(item, str) and item.strip()
+                    for item in unavailable
                 )
             ):
-                fail("unavailable_actions must be a string list")
+                fail(
+                    "unavailable_actions must be a list of non-empty "
+                    "strings"
+                )
+            else:
+                if len(unavailable) != len(set(unavailable)):
+                    fail(
+                        "unavailable_actions must not contain duplicates"
+                    )
+                if set(available).intersection(unavailable):
+                    fail(
+                        "available_actions and unavailable_actions must "
+                        "be disjoint"
+                    )
             if (
                 self_initiated is not None
                 and not isinstance(self_initiated, bool)
