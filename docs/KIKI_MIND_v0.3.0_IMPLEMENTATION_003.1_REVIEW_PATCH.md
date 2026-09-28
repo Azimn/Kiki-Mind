@@ -5,8 +5,8 @@
 **External reviewer:** Calibos  
 **Review date:** 2026-09-28  
 **Reviewed head:** `45e723a34e8f8ab36300e35f9ad481ef3f7c9e53`  
-**Patch status:** candidate response to external hostile review  
-**Merge status:** still held for reviewer confirmation
+**Patch status:** externally re-probed and accepted  
+**Merge status:** merged to `main` as `e88afab3d6a06f7214672d322c5562c7a9354592`
 
 Calibos ran 22 independent probes against Implementation 003 and found one merge-blocking wound plus three non-blocking semantic wounds.
 
@@ -112,13 +112,25 @@ Mixed v0.2.2 and v0.3.0 policy history remains legal and verifiable.
 6. semantic echo receipts remaining unclassified as corroboration;
 7. index head tracking for linear commitment chains.
 
-## Gate
+## External gate result
 
-This patch answers the blocking review wound.
+Calibos reran the targeted wound probes against `7a7a7efb68ba912efc06976b7b14e156e2115d83`.
 
-It does not self-certify the external gate.
+Results:
 
-Calibos should rerun the commitment-fork, duplicate-root, terminal-transition, restricted-parent, and hypothesis-echo probes against the patched head.
+- targeted re-probes: 19/19 hold;
+- local full suite: 84/84 green;
+- sibling forks rejected at the gate;
+- duplicate made roots rejected;
+- terminal phases remain terminal;
+- restricted causal parents rejected for self-report and correction;
+- echo self-report remains canonical only as a receipt, with no manufactured corroboration;
+- direct synthetic projector forks raise instead of selecting a winner;
+- the fail-closed projector error propagates through the runner.
+
+Calibos explicitly closed the merge-blocking wound from the external-review side.
+
+The external gate is satisfied.
 
 The observation may become canon.
 

@@ -36,11 +36,17 @@ The hostile-review question was:
 
 > **Where can the shadow brain become the real brain?**
 
-The external gate is satisfied. Implementation 003 is now active on `kiki/impl-003-developmental-evidence`.
+The external 002 gate is satisfied.
 
-Implementation 003 introduces the Developmental Evidence Layer. Canon records observations and their conditions. Psychological meaning remains derived.
+Implementation 003 is now merged on `main` as the Developmental Evidence Layer.
+
+Canon records observations and their conditions. Psychological meaning remains derived.
 
 The first canonical observation kinds are self-report, choice, commitment, and correction. Renderer, model, runtime, modality, tools, affordances, and opportunity constraints travel with the evidence so model changes cannot quietly masquerade as development.
+
+Calibos completed the external 003 hostile review, found one merge-blocking commitment-lineage wound, and then reran the patched 003.1 head. The targeted re-probes passed 19/19 with the full 84/84 suite green locally and in CI.
+
+The 003 external gate is satisfied.
 
 ## Repository voice
 

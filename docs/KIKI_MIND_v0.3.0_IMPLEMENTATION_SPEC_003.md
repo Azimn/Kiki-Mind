@@ -2,8 +2,9 @@
 
 ## Developmental Evidence Layer
 
-**Status:** implementation branch candidate  
-**Branch:** `kiki/impl-003-developmental-evidence`  
+**Status:** accepted and merged  
+**Merged:** `e88afab3d6a06f7214672d322c5562c7a9354592`  
+**Reviewed patch head:** `7a7a7efb68ba912efc06976b7b14e156e2115d83`  
 **Base:** merged Implementation 002 on `main`  
 **Architecture:** Kiki Mind v0.3.0  
 **Scope:** canonical developmental observations plus a non-interpretive evidence index
@@ -255,5 +256,9 @@ Implementation 003 does not infer whether Kiki is:
 Those are later hypotheses, if they are ever justified at all.
 
 Implementation 003 builds the receipts.
+
+Calibos's targeted 003.1 re-probes passed 19/19 against the patched head, including direct synthetic-fork attacks on the projector. The external merge-blocking wound is closed.
+
+The hypothesis-echo problem remains explicitly open as a semantic limitation. Receipt count is not corroboration.
 
 The glamorous psychology can wait outside the velvet rope.
