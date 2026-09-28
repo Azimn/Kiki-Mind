@@ -1,3 +1,10 @@
+"""Kiki Mind's typed vocabulary.
+
+These types are the labels sewn into the architecture. They keep evidence,
+interpretation, autobiography, governance, renderers, and reconstruction from
+ending up in one giant mystery handbag.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
