@@ -468,6 +468,20 @@ class TransitionGate:
                 "developmental observation requires canonical causal context"
             )
 
+        causal_ancestry_ids = {
+            edge.event_id
+            for edge in p.ancestry
+            if edge.mode == DerivationMode.CAUSAL_PARENT
+        }
+        missing_causal_ancestry = set(
+            p.causal_parent_ids
+        ).difference(causal_ancestry_ids)
+        if missing_causal_ancestry:
+            fail(
+                "developmental causal parents must also appear as "
+                "CAUSAL_PARENT ancestry"
+            )
+
         kind_value = p.payload.get("observation_kind")
         try:
             kind = DevelopmentalObservationKind(kind_value)

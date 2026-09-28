@@ -107,6 +107,7 @@ class KikiMindImplementation003Tests(unittest.TestCase):
         claim_domain=ClaimDomain.DEVELOPMENTAL_EVIDENCE,
         restrictions=frozenset(),
         causal_parent_ids=None,
+        include_causal_ancestry=True,
     ):
         body = {
             "observation_kind": kind.value,
@@ -120,12 +121,16 @@ class KikiMindImplementation003Tests(unittest.TestCase):
             if causal_parent_ids is not None
             else (parent.event_id,)
         )
-        ancestry = tuple(
-            AncestryEdge(
-                event_id,
-                DerivationMode.CAUSAL_PARENT,
+        ancestry = (
+            tuple(
+                AncestryEdge(
+                    event_id,
+                    DerivationMode.CAUSAL_PARENT,
+                )
+                for event_id in parent_ids
             )
-            for event_id in parent_ids
+            if include_causal_ancestry
+            else ()
         )
         return self.ledger.commit(
             EventProposal(
@@ -175,6 +180,16 @@ class KikiMindImplementation003Tests(unittest.TestCase):
         self.assertNotIn("report_text", entry)
         self.assertNotIn("strength", entry)
         self.assertNotIn("confidence", entry)
+
+    def test_causal_parents_must_also_be_causal_ancestry(self):
+        parent = self.source()
+
+        with self.assertRaises(GateRejected):
+            self.observation(
+                parent,
+                payload={"report_text": "I feel fine."},
+                include_causal_ancestry=False,
+            )
 
     def test_renderer_is_required_and_must_be_registered(self):
         parent = self.source()
