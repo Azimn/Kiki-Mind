@@ -488,6 +488,34 @@ class KikiMindImplementation002Tests(unittest.TestCase):
             1,
         )
 
+    def test_counterfeit_projection_table_definition_is_rejected(self):
+        ProjectionStore(self.proj)
+        conn = sqlite3.connect(self.proj)
+        conn.execute("DROP TABLE projection_state")
+        conn.execute(
+            """
+            CREATE TABLE projection_state (
+                projector_name TEXT PRIMARY KEY,
+                projector_version TEXT NOT NULL,
+                projector_fingerprint TEXT NOT NULL,
+                state_json TEXT NOT NULL,
+                state_hash TEXT NOT NULL,
+                last_sequence INTEGER NOT NULL,
+                last_event_hash TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                canonicality TEXT NOT NULL
+            )
+            """
+        )
+        conn.commit()
+        conn.close()
+
+        with self.assertRaisesRegex(
+            ProjectionSchemaError,
+            "table definition drift",
+        ):
+            ProjectionStore(self.proj)
+
     def test_unknown_projection_table_is_rejected(self):
         ProjectionStore(self.proj)
         conn = sqlite3.connect(self.proj)

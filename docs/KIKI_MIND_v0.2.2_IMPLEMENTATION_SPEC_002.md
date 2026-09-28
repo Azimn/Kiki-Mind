@@ -87,3 +87,14 @@ Resolved-path comparison already rejected identical paths and symlink aliases. A
 Implementation 002.5 uses an explicit same-file check when both paths exist, so a hardlink alias of the canonical ledger fails immediately with `ProjectionStoreSeparationError` rather than being rejected later only because the projection schema happens not to match.
 
 See `KIKI_MIND_v0.2.2_IMPLEMENTATION_002.5_REVIEW_PATCH.md`.
+
+
+## Implementation 002.6 projection-schema definition hardening
+
+Projection schema verification now checks the normalized `CREATE TABLE projection_state` definition, not only the table name and column names.
+
+A counterfeit table with the expected column labels but weakened constraints previously passed the column-name check. Implementation 002.6 rejects that schema as definition drift.
+
+This repeats the lesson learned during 001.2 trigger hardening: names are labels, definitions are the mechanism.
+
+See `KIKI_MIND_v0.2.2_IMPLEMENTATION_002.6_REVIEW_PATCH.md`.

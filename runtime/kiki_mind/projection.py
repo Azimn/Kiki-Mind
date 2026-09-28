@@ -243,6 +243,21 @@ def projector_fingerprint(projector: Projector) -> str:
 
 class ProjectionStore:
     _KNOWN_USER_TABLES = {"projection_state"}
+    _EXPECTED_TABLE_SQL = """
+        CREATE TABLE projection_state (
+            projector_name TEXT PRIMARY KEY,
+            projector_version TEXT NOT NULL,
+            projector_fingerprint TEXT NOT NULL,
+            state_json TEXT NOT NULL,
+            state_hash TEXT NOT NULL,
+            last_sequence INTEGER NOT NULL
+                CHECK(last_sequence >= 0),
+            last_event_hash TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            canonicality TEXT NOT NULL
+                CHECK(canonicality='derived_disposable')
+        )
+    """
     _EXPECTED_COLUMNS = (
         "projector_name",
         "projector_version",
@@ -282,23 +297,7 @@ class ProjectionStore:
             if existing is not None:
                 return
 
-            conn.execute(
-                """
-                CREATE TABLE projection_state (
-                    projector_name TEXT PRIMARY KEY,
-                    projector_version TEXT NOT NULL,
-                    projector_fingerprint TEXT NOT NULL,
-                    state_json TEXT NOT NULL,
-                    state_hash TEXT NOT NULL,
-                    last_sequence INTEGER NOT NULL
-                        CHECK(last_sequence >= 0),
-                    last_event_hash TEXT NOT NULL,
-                    updated_at TEXT NOT NULL,
-                    canonicality TEXT NOT NULL
-                        CHECK(canonicality='derived_disposable')
-                )
-                """
-            )
+            conn.execute(self._EXPECTED_TABLE_SQL)
             conn.commit()
         finally:
             conn.close()
@@ -319,6 +318,29 @@ class ProjectionStore:
                 "unacknowledged projection table set: "
                 f"expected {sorted(self._KNOWN_USER_TABLES)}, "
                 f"found {sorted(actual)}"
+            )
+
+        table_row = conn.execute(
+            """
+            SELECT sql
+            FROM sqlite_schema
+            WHERE type='table'
+              AND name='projection_state'
+            """
+        ).fetchone()
+        if table_row is None:
+            raise ProjectionSchemaError(
+                "projection_state table definition is missing"
+            )
+
+        def normalize_sql(sql: str | None) -> str:
+            return " ".join((sql or "").split()).rstrip(";").lower()
+
+        if normalize_sql(table_row["sql"]) != normalize_sql(
+            self._EXPECTED_TABLE_SQL
+        ):
+            raise ProjectionSchemaError(
+                "projection_state table definition drift"
             )
 
         columns = conn.execute(
