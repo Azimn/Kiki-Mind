@@ -224,7 +224,11 @@ def projector_fingerprint(projector: Projector) -> str:
         "apply": _method_material(projector.apply),
     }
 
-    source_path = inspect.getsourcefile(cls)
+    try:
+        source_path = inspect.getsourcefile(cls)
+    except (OSError, TypeError):
+        source_path = None
+
     if source_path:
         path = Path(source_path)
         if path.is_file():
