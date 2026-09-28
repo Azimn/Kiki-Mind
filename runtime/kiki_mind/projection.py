@@ -649,23 +649,35 @@ class ProjectionRunner:
         _, state = self._verified_snapshot()
         return state
 
-    def current_verified(self) -> dict[str, Any]:
-        """Return replay-verified state only when it is at ledger head."""
-        snapshot, state = self._verified_snapshot()
+    def _assert_current_checkpoint(
+        self,
+        snapshot: ProjectionSnapshot,
+        *,
+        context: str,
+    ) -> None:
         head = self.ledger.head()
         head_sequence = head.sequence if head is not None else 0
         head_hash = head.event_hash if head is not None else GENESIS_HASH
 
         if snapshot.last_sequence != head_sequence:
             raise ProjectionStaleError(
-                "projection is replay-valid for sequence "
+                f"{context}: projection is replay-valid for sequence "
                 f"{snapshot.last_sequence} but canonical head is "
                 f"{head_sequence}"
             )
         if snapshot.last_event_hash != head_hash:
             raise ProjectionCheckpointMismatch(
-                "projection head hash does not match canonical ledger head"
+                f"{context}: projection head hash does not match "
+                "canonical ledger head"
             )
+
+    def current_verified(self) -> dict[str, Any]:
+        """Return replay-verified state only when it is at ledger head."""
+        snapshot, state = self._verified_snapshot()
+        self._assert_current_checkpoint(
+            snapshot,
+            context="current verification",
+        )
         return state
 
     def run(
@@ -715,7 +727,13 @@ class ProjectionRunner:
             raise ProjectionConflict(
                 "projection did not reach requested canonical prefix"
             )
-        return self._assert_replay_equivalent(saved)
+        state = self._assert_replay_equivalent(saved)
+        if through_sequence is None:
+            self._assert_current_checkpoint(
+                saved,
+                context="projection run",
+            )
+        return state
 
     def rebuild(
         self,
@@ -756,7 +774,13 @@ class ProjectionRunner:
             raise ProjectionConflict(
                 "rebuilt projection did not reach requested canonical prefix"
             )
-        return self._assert_replay_equivalent(saved)
+        state = self._assert_replay_equivalent(saved)
+        if through_sequence is None:
+            self._assert_current_checkpoint(
+                saved,
+                context="projection rebuild",
+            )
+        return state
 
     def repair(self) -> dict[str, Any]:
         try:

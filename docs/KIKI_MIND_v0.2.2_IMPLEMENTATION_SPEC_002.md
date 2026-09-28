@@ -41,3 +41,12 @@ A replay-valid projection is not necessarily current. The supported read surface
 Staleness is not corruption. `repair()` does not silently convert a stale projection into a current one. Consumers that require current state must fail closed on `ProjectionStaleError` or explicitly advance the projector with `run()`.
 
 See `KIKI_MIND_v0.2.2_IMPLEMENTATION_002.1_REVIEW_PATCH.md`.
+
+
+## Implementation 002.2 concurrent-head hardening
+
+A default `run()` or `rebuild()` now rechecks the canonical ledger head before returning. If canonical history advances after the runner chooses its target but before the derived state is returned, the operation raises `ProjectionStaleError` rather than returning a state that has already lost freshness.
+
+Explicit historical-prefix operations using `through_sequence` retain checkpoint semantics and do not claim to be current.
+
+See `KIKI_MIND_v0.2.2_IMPLEMENTATION_002.2_REVIEW_PATCH.md`.

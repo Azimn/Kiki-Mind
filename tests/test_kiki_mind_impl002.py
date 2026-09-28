@@ -225,6 +225,35 @@ class KikiMindImplementation002Tests(unittest.TestCase):
         with self.assertRaises(ProjectionStaleError):
             runner.repair()
 
+    def test_default_run_detects_head_advance_during_projection(self):
+        class ConcurrentAppendStore(ProjectionStore):
+            def __init__(store_self, path):
+                store_self.appended = False
+                super().__init__(path)
+
+            def _before_commit(store_self, conn, snapshot):
+                if snapshot.last_sequence > 0 and not store_self.appended:
+                    store_self.appended = True
+                    self.evidence("concurrent")
+
+        self.evidence("a")
+        store = ConcurrentAppendStore(self.proj)
+        runner = self.accounting_runner(store=store)
+
+        with self.assertRaises(ProjectionStaleError):
+            runner.run()
+
+        self.assertEqual(
+            runner.checkpoint_verified()["event_count"],
+            1,
+        )
+        caught_up = runner.run()
+        self.assertEqual(caught_up["event_count"], 2)
+        self.assertEqual(
+            runner.current_verified()["event_count"],
+            2,
+        )
+
     def test_version_mismatch_refuses_incremental_continuation(self):
         self.evidence("a")
         self.accounting_runner().run()
