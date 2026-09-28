@@ -76,3 +76,14 @@ Implementation 002.4 serializes Python code constants structurally, including ne
 A subprocess probe verifies that the same dynamically defined projector containing a comprehension produces the same fingerprint across independent Python processes.
 
 See `KIKI_MIND_v0.2.2_IMPLEMENTATION_002.4_REVIEW_PATCH.md`.
+
+
+## Implementation 002.5 physical-file separation hardening
+
+The canonical ledger and projection store must be different physical files, not merely different path strings.
+
+Resolved-path comparison already rejected identical paths and symlink aliases. A hardlink can still give the same inode two different resolved names.
+
+Implementation 002.5 uses an explicit same-file check when both paths exist, so a hardlink alias of the canonical ledger fails immediately with `ProjectionStoreSeparationError` rather than being rejected later only because the projection schema happens not to match.
+
+See `KIKI_MIND_v0.2.2_IMPLEMENTATION_002.5_REVIEW_PATCH.md`.

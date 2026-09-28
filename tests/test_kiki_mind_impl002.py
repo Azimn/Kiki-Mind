@@ -9,6 +9,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
 from pathlib import Path
 import sqlite3
 import subprocess
@@ -453,6 +454,17 @@ class KikiMindImplementation002Tests(unittest.TestCase):
             ProjectionRunner(
                 self.ledger,
                 self.db,
+                LedgerAccountingProjectorV1(),
+            )
+
+    def test_hardlink_alias_of_ledger_is_rejected(self):
+        alias = self.db.with_name("projection-hardlink.db")
+        os.link(self.db, alias)
+
+        with self.assertRaises(ProjectionStoreSeparationError):
+            ProjectionRunner(
+                self.ledger,
+                alias,
                 LedgerAccountingProjectorV1(),
             )
 

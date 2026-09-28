@@ -593,9 +593,20 @@ class ProjectionRunner:
     ):
         ledger_path = Path(ledger.path).resolve()
         projection_resolved = Path(projection_path).resolve()
-        if ledger_path == projection_resolved:
+
+        same_physical_file = False
+        if ledger_path.exists() and projection_resolved.exists():
+            try:
+                same_physical_file = ledger_path.samefile(
+                    projection_resolved
+                )
+            except OSError:
+                same_physical_file = False
+
+        if ledger_path == projection_resolved or same_physical_file:
             raise ProjectionStoreSeparationError(
-                "canonical ledger and projection store must be separate files"
+                "canonical ledger and projection store must be separate "
+                "physical files"
             )
 
         self.ledger = ledger
