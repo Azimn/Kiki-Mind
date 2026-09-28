@@ -98,3 +98,14 @@ A counterfeit table with the expected column labels but weakened constraints pre
 This repeats the lesson learned during 001.2 trigger hardening: names are labels, definitions are the mechanism.
 
 See `KIKI_MIND_v0.2.2_IMPLEMENTATION_002.6_REVIEW_PATCH.md`.
+
+
+## Implementation 002.7 supported-read-surface hardening
+
+Low-level projection storage primitives are no longer exported from the package top-level API.
+
+`ProjectionStore`, `ProjectionSnapshot`, and `ProjectionUnsafeReadError` remain available from the explicit `runtime.kiki_mind.projection` module for implementation work and hostile probes, but ordinary consumers see `ProjectionRunner` and its verified read contracts instead.
+
+This does not create a security sandbox. Python code can still deliberately import internal modules. The goal is structural guidance: the easy path should also be the safe path.
+
+See `KIKI_MIND_v0.2.2_IMPLEMENTATION_002.7_REVIEW_PATCH.md`.

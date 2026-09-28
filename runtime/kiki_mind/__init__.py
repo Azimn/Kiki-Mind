@@ -43,11 +43,8 @@ __all__ = [
     "ProjectionRunner",
     "ProjectionSchemaError",
     "ProjectionSerializationError",
-    "ProjectionSnapshot",
-    "ProjectionStore",
     "ProjectionStoreSeparationError",
     "ProjectionStaleError",
-    "ProjectionUnsafeReadError",
     "ProjectionVersionMismatch",
 ]
 
@@ -61,10 +58,7 @@ from .projection import (
     ProjectionRunner,
     ProjectionSchemaError,
     ProjectionSerializationError,
-    ProjectionSnapshot,
-    ProjectionStore,
     ProjectionStoreSeparationError,
     ProjectionStaleError,
-    ProjectionUnsafeReadError,
     ProjectionVersionMismatch,
 )

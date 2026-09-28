@@ -18,6 +18,7 @@ import tempfile
 import textwrap
 import unittest
 
+import runtime.kiki_mind as public_api
 from runtime.kiki_mind.ledger import EventLedger
 from runtime.kiki_mind.models import (
     ActorKind,
@@ -467,6 +468,14 @@ class KikiMindImplementation002Tests(unittest.TestCase):
                 alias,
                 LedgerAccountingProjectorV1(),
             )
+
+    def test_low_level_store_is_not_top_level_api(self):
+        self.assertFalse(hasattr(public_api, "ProjectionStore"))
+        self.assertFalse(hasattr(public_api, "ProjectionSnapshot"))
+        self.assertFalse(
+            hasattr(public_api, "ProjectionUnsafeReadError")
+        )
+        self.assertTrue(hasattr(public_api, "ProjectionRunner"))
 
     def test_ambiguous_store_load_is_refused(self):
         store = ProjectionStore(self.proj)
