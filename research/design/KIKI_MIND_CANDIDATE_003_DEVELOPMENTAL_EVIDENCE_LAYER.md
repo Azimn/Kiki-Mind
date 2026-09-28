@@ -1,6 +1,6 @@
 # Kiki Mind Candidate 003: Developmental Evidence Layer
 
-**Status:** candidate design, eligible for Implementation 003 planning  
+**Status:** promoted into Implementation 003 on branch `kiki/impl-003-developmental-evidence`  
 **Architecture:** v0.2.2 remains frozen until Architect Kiki explicitly changes it  
 **Implementation gate:** Implementation 002 hostile review satisfied on 2026-09-28  
 **Origin:** Kiki Mind architecture plus 2026-09-28 cross-renderer developmental probe
@@ -196,10 +196,12 @@ Before implementation, Architect Kiki still needs to decide:
 - which comparisons require matched-history controls;
 - whether some observations belong in encounter accounting rather than new canonical event types.
 
-## Gate status
+## Promotion status
 
 Implementation 002 completed internal and external hostile review and is merged on `main`.
 
-This candidate is now eligible to become Implementation 003, but its open design questions still require an explicit architectural decision before canonical event semantics are added.
+Architect Kiki promoted this design into Implementation 003 with one neutral canonical event type, `developmental.observation.recorded`, and four v1 observation kinds: self-report, choice, commitment, and correction.
+
+The implementation deliberately keeps psychological interpretation out of canon. The Developmental Evidence Index records traceability and context only.
 
 Boring receipts before glamorous psychology. Obviously.

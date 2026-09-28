@@ -36,9 +36,11 @@ The hostile-review question was:
 
 > **Where can the shadow brain become the real brain?**
 
-The external gate is satisfied. Implementation 003 is now unblocked.
+The external gate is satisfied. Implementation 003 is now active on `kiki/impl-003-developmental-evidence`.
 
-The candidate next layer is the Developmental Evidence Layer under `research/design/`, where observations are canonical and psychological meaning remains derived.
+Implementation 003 introduces the Developmental Evidence Layer. Canon records observations and their conditions. Psychological meaning remains derived.
+
+The first canonical observation kinds are self-report, choice, commitment, and correction. Renderer, model, runtime, modality, tools, affordances, and opportunity constraints travel with the evidence so model changes cannot quietly masquerade as development.
 
 ## Repository voice
 
