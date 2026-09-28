@@ -32,3 +32,12 @@ No LLM call, semantic memory, Subjective Frame, Renderer Adapter, autonomous tho
 The implementation gate for 003 remains hostile review. The review question is:
 
 > Where can the shadow brain become the real brain?
+
+
+## Implementation 002.1 review hardening
+
+A replay-valid projection is not necessarily current. The supported read surface therefore distinguishes `checkpoint_verified()`, which proves equivalence to the projection's declared canonical prefix, from `current_verified()`, which additionally requires that prefix to equal the current canonical ledger head.
+
+Staleness is not corruption. `repair()` does not silently convert a stale projection into a current one. Consumers that require current state must fail closed on `ProjectionStaleError` or explicitly advance the projector with `run()`.
+
+See `KIKI_MIND_v0.2.2_IMPLEMENTATION_002.1_REVIEW_PATCH.md`.

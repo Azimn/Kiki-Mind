@@ -31,6 +31,7 @@ from runtime.kiki_mind.projection import (
     ProjectionSerializationError,
     ProjectionStore,
     ProjectionStoreSeparationError,
+    ProjectionStaleError,
     ProjectionVersionMismatch,
 )
 from runtime.kiki_mind.projectors.accounting import (
@@ -187,11 +188,42 @@ class KikiMindImplementation002Tests(unittest.TestCase):
         runner.run()
         self.evidence("b")
 
-        stale_but_verified = runner.current_verified()
+        with self.assertRaises(ProjectionStaleError):
+            runner.current_verified()
+
+        stale_prefix = runner.checkpoint_verified()
         caught_up = runner.run()
 
-        self.assertEqual(stale_but_verified["event_count"], 1)
+        self.assertEqual(stale_prefix["event_count"], 1)
         self.assertEqual(caught_up["event_count"], 2)
+        self.assertEqual(
+            runner.current_verified()["event_count"],
+            2,
+        )
+
+    def test_partial_rebuild_is_explicitly_checkpoint_verified(self):
+        self.evidence("a")
+        self.evidence("b")
+        runner = self.accounting_runner()
+
+        partial = runner.rebuild(through_sequence=1)
+
+        self.assertEqual(partial["event_count"], 1)
+        self.assertEqual(
+            runner.checkpoint_verified()["event_count"],
+            1,
+        )
+        with self.assertRaises(ProjectionStaleError):
+            runner.current_verified()
+
+    def test_repair_does_not_launder_staleness_as_corruption(self):
+        self.evidence("a")
+        runner = self.accounting_runner()
+        runner.run()
+        self.evidence("b")
+
+        with self.assertRaises(ProjectionStaleError):
+            runner.repair()
 
     def test_version_mismatch_refuses_incremental_continuation(self):
         self.evidence("a")

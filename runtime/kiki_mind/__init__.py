@@ -46,6 +46,7 @@ __all__ = [
     "ProjectionSnapshot",
     "ProjectionStore",
     "ProjectionStoreSeparationError",
+    "ProjectionStaleError",
     "ProjectionVersionMismatch",
 ]
 
@@ -62,5 +63,6 @@ from .projection import (
     ProjectionSnapshot,
     ProjectionStore,
     ProjectionStoreSeparationError,
+    ProjectionStaleError,
     ProjectionVersionMismatch,
 )

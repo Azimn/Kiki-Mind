@@ -61,6 +61,10 @@ class ProjectionBackwardsError(ProjectionError):
     pass
 
 
+class ProjectionStaleError(ProjectionError):
+    pass
+
+
 class Projector(Protocol):
     name: str
     version: str
@@ -622,7 +626,9 @@ class ProjectionRunner:
             )
         return loaded
 
-    def current_verified(self) -> dict[str, Any]:
+    def _verified_snapshot(
+        self,
+    ) -> tuple[ProjectionSnapshot, dict[str, Any]]:
         self.ledger.verify_schema()
         self.ledger.verify_integrity()
         snapshot = self.store.load(self.projector.name)
@@ -631,7 +637,36 @@ class ProjectionRunner:
                 "projection has not been built"
             )
         self._validate_snapshot(snapshot)
-        return self._assert_replay_equivalent(snapshot)
+        state = self._assert_replay_equivalent(snapshot)
+        return snapshot, state
+
+    def checkpoint_verified(self) -> dict[str, Any]:
+        """Return replay-verified state at its declared canonical prefix.
+
+        This method proves equivalence to the checkpoint the projection claims.
+        It does not claim that checkpoint is the current canonical ledger head.
+        """
+        _, state = self._verified_snapshot()
+        return state
+
+    def current_verified(self) -> dict[str, Any]:
+        """Return replay-verified state only when it is at ledger head."""
+        snapshot, state = self._verified_snapshot()
+        head = self.ledger.head()
+        head_sequence = head.sequence if head is not None else 0
+        head_hash = head.event_hash if head is not None else GENESIS_HASH
+
+        if snapshot.last_sequence != head_sequence:
+            raise ProjectionStaleError(
+                "projection is replay-valid for sequence "
+                f"{snapshot.last_sequence} but canonical head is "
+                f"{head_sequence}"
+            )
+        if snapshot.last_event_hash != head_hash:
+            raise ProjectionCheckpointMismatch(
+                "projection head hash does not match canonical ledger head"
+            )
+        return state
 
     def run(
         self,
@@ -711,7 +746,17 @@ class ProjectionRunner:
             last_event_hash=event_hash,
         )
         self.store.replace(snapshot)
-        return self.current_verified()
+        saved = self.store.load(self.projector.name)
+        if saved is None:
+            raise ProjectionConflict(
+                "projection disappeared during rebuild"
+            )
+        self._validate_snapshot(saved)
+        if saved.last_sequence != target:
+            raise ProjectionConflict(
+                "rebuilt projection did not reach requested canonical prefix"
+            )
+        return self._assert_replay_equivalent(saved)
 
     def repair(self) -> dict[str, Any]:
         try:
