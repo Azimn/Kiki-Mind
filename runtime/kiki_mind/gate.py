@@ -70,6 +70,12 @@ class LedgerView(Protocol):
     ) -> tuple[str, EventRecord | None]: ...
     def endorsement_proposal_exists(self, proposal_event_id: str) -> bool: ...
     def has_any_operator_lease(self) -> bool: ...
+    def developmental_commitment_root_exists(
+        self, commitment_id: str
+    ) -> bool: ...
+    def developmental_commitment_child_exists(
+        self, prior_event_id: str
+    ) -> bool: ...
 
 
 def _parse_expiry(value: object) -> datetime | None:
@@ -459,6 +465,23 @@ class TransitionGate:
                 "observation"
             )
 
+        restricted_parent_ids = []
+        for event_id in p.causal_parent_ids:
+            parent = ledger.get_event(event_id)
+            if (
+                parent is not None
+                and Restriction.FORBID_CANONICAL_EXPERIENCE
+                in parent.content_restrictions
+            ):
+                restricted_parent_ids.append(event_id)
+        if restricted_parent_ids:
+            f.append(GateFailure.CLAIM_DOMAIN_RESTRICTED)
+            d.append(
+                "developmental observation cannot use causal parents "
+                "that forbid canonical experience: "
+                + ", ".join(sorted(restricted_parent_ids))
+            )
+
         if not p.renderer_mediated or not p.renderer_id:
             fail(
                 "developmental observation requires an attributed renderer"
@@ -725,6 +748,17 @@ class TransitionGate:
                     fail(
                         "new commitment must not claim a prior commitment"
                     )
+                if (
+                    isinstance(commitment_id, str)
+                    and commitment_id.strip()
+                    and ledger.developmental_commitment_root_exists(
+                        commitment_id
+                    )
+                ):
+                    fail(
+                        "commitment_id already has a made root; use a new "
+                        "commitment_id for a new lifecycle"
+                    )
             else:
                 if not isinstance(prior_id, str):
                     fail(
@@ -749,6 +783,39 @@ class TransitionGate:
                             "prior commitment must belong to the same "
                             "commitment lineage"
                         )
+                    else:
+                        prior_phase = prior.payload.get("phase")
+                        allowed_transitions = {
+                            "made": {
+                                "revised",
+                                "fulfilled",
+                                "declined",
+                                "expired_unresolved",
+                            },
+                            "revised": {
+                                "revised",
+                                "fulfilled",
+                                "declined",
+                                "expired_unresolved",
+                            },
+                        }
+                        if phase not in allowed_transitions.get(
+                            prior_phase,
+                            set(),
+                        ):
+                            fail(
+                                "commitment phase transition is invalid: "
+                                f"{prior_phase} -> {phase}"
+                            )
+                        if (
+                            ledger.developmental_commitment_child_exists(
+                                prior_id
+                            )
+                        ):
+                            fail(
+                                "commitment lineage already has a child "
+                                "for the named prior event"
+                            )
 
         elif kind == DevelopmentalObservationKind.CORRECTION:
             corrected_id = p.payload["corrected_event_id"]

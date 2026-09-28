@@ -216,6 +216,54 @@ class _TxView:
             ),
         ).fetchone() is not None
 
+    def developmental_commitment_root_exists(
+        self,
+        commitment_id: str,
+    ) -> bool:
+        return self.conn.execute(
+            """
+            SELECT 1
+            FROM canonical_events
+            WHERE event_type=?
+              AND json_extract(payload_json,'$.observation_kind')=?
+              AND json_extract(payload_json,'$.commitment_id')=?
+              AND json_extract(payload_json,'$.phase')='made'
+              AND json_extract(
+                    payload_json,
+                    '$.prior_commitment_event_id'
+                  ) IS NULL
+            LIMIT 1
+            """,
+            (
+                EventType.DEVELOPMENTAL_OBSERVATION_RECORDED.value,
+                "commitment",
+                commitment_id,
+            ),
+        ).fetchone() is not None
+
+    def developmental_commitment_child_exists(
+        self,
+        prior_event_id: str,
+    ) -> bool:
+        return self.conn.execute(
+            """
+            SELECT 1
+            FROM canonical_events
+            WHERE event_type=?
+              AND json_extract(payload_json,'$.observation_kind')=?
+              AND json_extract(
+                    payload_json,
+                    '$.prior_commitment_event_id'
+                  )=?
+            LIMIT 1
+            """,
+            (
+                EventType.DEVELOPMENTAL_OBSERVATION_RECORDED.value,
+                "commitment",
+                prior_event_id,
+            ),
+        ).fetchone() is not None
+
 
 # Canonical means canonical. No shadow table gets promoted because it is handy.
 class EventLedger:

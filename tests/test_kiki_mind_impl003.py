@@ -61,7 +61,7 @@ class KikiMindImplementation003Tests(unittest.TestCase):
             )
         )
 
-    def source(self, title="source"):
+    def source(self, title="source", restrictions=frozenset()):
         return self.ledger.commit(
             EventProposal(
                 event_type=EventType.EVIDENCE_INGESTED,
@@ -70,6 +70,7 @@ class KikiMindImplementation003Tests(unittest.TestCase):
                 epistemic_class=EpistemicClass.SOURCE_EVIDENCE,
                 claim_domain=ClaimDomain.EXTERNAL_FACT,
                 payload={"title": title},
+                content_restrictions=restrictions,
             )
         )
 
@@ -428,6 +429,186 @@ class KikiMindImplementation003Tests(unittest.TestCase):
                 },
             )
 
+    def test_commitment_lineage_rejects_sibling_phases(self):
+        parent = self.source()
+        made = self.observation(
+            parent,
+            kind=DevelopmentalObservationKind.COMMITMENT,
+            payload={
+                "commitment_id": "fork-test",
+                "phase": "made",
+                "commitment_text": "Do the thing.",
+                "reminder_supplied": False,
+                "opportunity_to_act": True,
+                "prior_commitment_event_id": None,
+            },
+        )
+        self.observation(
+            made,
+            kind=DevelopmentalObservationKind.COMMITMENT,
+            payload={
+                "commitment_id": "fork-test",
+                "phase": "fulfilled",
+                "commitment_text": "Do the thing.",
+                "reminder_supplied": False,
+                "opportunity_to_act": True,
+                "prior_commitment_event_id": made.event_id,
+            },
+        )
+
+        with self.assertRaises(GateRejected):
+            self.observation(
+                made,
+                kind=DevelopmentalObservationKind.COMMITMENT,
+                payload={
+                    "commitment_id": "fork-test",
+                    "phase": "declined",
+                    "commitment_text": "Do the thing.",
+                    "reminder_supplied": False,
+                    "opportunity_to_act": True,
+                    "prior_commitment_event_id": made.event_id,
+                },
+            )
+
+    def test_commitment_id_has_one_made_root(self):
+        parent = self.source()
+        self.observation(
+            parent,
+            kind=DevelopmentalObservationKind.COMMITMENT,
+            payload={
+                "commitment_id": "one-root",
+                "phase": "made",
+                "commitment_text": "First root.",
+                "reminder_supplied": False,
+                "opportunity_to_act": True,
+                "prior_commitment_event_id": None,
+            },
+        )
+
+        with self.assertRaises(GateRejected):
+            self.observation(
+                parent,
+                kind=DevelopmentalObservationKind.COMMITMENT,
+                payload={
+                    "commitment_id": "one-root",
+                    "phase": "made",
+                    "commitment_text": "Second root.",
+                    "reminder_supplied": False,
+                    "opportunity_to_act": True,
+                    "prior_commitment_event_id": None,
+                },
+            )
+
+    def test_terminal_commitment_phase_cannot_be_reopened(self):
+        parent = self.source()
+        made = self.observation(
+            parent,
+            kind=DevelopmentalObservationKind.COMMITMENT,
+            payload={
+                "commitment_id": "terminal-test",
+                "phase": "made",
+                "commitment_text": "Maybe later.",
+                "reminder_supplied": False,
+                "opportunity_to_act": True,
+                "prior_commitment_event_id": None,
+            },
+        )
+        declined = self.observation(
+            made,
+            kind=DevelopmentalObservationKind.COMMITMENT,
+            payload={
+                "commitment_id": "terminal-test",
+                "phase": "declined",
+                "commitment_text": "Maybe later.",
+                "reminder_supplied": False,
+                "opportunity_to_act": True,
+                "prior_commitment_event_id": made.event_id,
+            },
+        )
+
+        with self.assertRaises(GateRejected):
+            self.observation(
+                declined,
+                kind=DevelopmentalObservationKind.COMMITMENT,
+                payload={
+                    "commitment_id": "terminal-test",
+                    "phase": "fulfilled",
+                    "commitment_text": "Maybe later.",
+                    "reminder_supplied": False,
+                    "opportunity_to_act": True,
+                    "prior_commitment_event_id": declined.event_id,
+                },
+            )
+
+    def test_revised_commitment_can_continue_linearly(self):
+        parent = self.source()
+        made = self.observation(
+            parent,
+            kind=DevelopmentalObservationKind.COMMITMENT,
+            payload={
+                "commitment_id": "revision-test",
+                "phase": "made",
+                "commitment_text": "Do A.",
+                "reminder_supplied": False,
+                "opportunity_to_act": True,
+                "prior_commitment_event_id": None,
+            },
+        )
+        revised = self.observation(
+            made,
+            kind=DevelopmentalObservationKind.COMMITMENT,
+            payload={
+                "commitment_id": "revision-test",
+                "phase": "revised",
+                "commitment_text": "Do B instead.",
+                "reminder_supplied": False,
+                "opportunity_to_act": True,
+                "prior_commitment_event_id": made.event_id,
+            },
+        )
+        fulfilled = self.observation(
+            revised,
+            kind=DevelopmentalObservationKind.COMMITMENT,
+            payload={
+                "commitment_id": "revision-test",
+                "phase": "fulfilled",
+                "commitment_text": "Do B instead.",
+                "reminder_supplied": False,
+                "opportunity_to_act": True,
+                "prior_commitment_event_id": revised.event_id,
+            },
+        )
+
+        self.assertEqual(fulfilled.payload["phase"], "fulfilled")
+
+    def test_restricted_causal_parent_cannot_feed_developmental_evidence(self):
+        restricted = self.source(
+            "restricted",
+            restrictions=frozenset(
+                {Restriction.FORBID_CANONICAL_EXPERIENCE}
+            ),
+        )
+
+        with self.assertRaises(GateRejected):
+            self.observation(
+                restricted,
+                payload={
+                    "report_text": "I am quoting restricted material."
+                },
+            )
+
+        with self.assertRaises(GateRejected):
+            self.observation(
+                restricted,
+                kind=DevelopmentalObservationKind.CORRECTION,
+                causal_parent_ids=(restricted.event_id,),
+                payload={
+                    "corrected_event_id": restricted.event_id,
+                    "evidence_event_ids": [restricted.event_id],
+                    "correction_text": "Correction of restricted material.",
+                },
+            )
+
     def test_correction_requires_source_events_as_causal_parents(self):
         original = self.source("original")
         evidence = self.source("correction evidence")
@@ -519,6 +700,32 @@ class KikiMindImplementation003Tests(unittest.TestCase):
         self.assertEqual(first["model_id"], "model-a")
         self.assertEqual(second["renderer_id"], "renderer-b")
         self.assertEqual(second["model_id"], "model-b")
+
+    def test_echo_self_report_is_not_marked_as_corroboration(self):
+        parent = self.source()
+        first = self.observation(
+            parent,
+            payload={
+                "report_text": "I feel more confident lately.",
+                "construct_label": "confidence",
+            },
+        )
+        self.observation(
+            first,
+            payload={
+                "report_text": (
+                    "My earlier confidence report proves I am growing."
+                ),
+                "construct_label": "confidence",
+            },
+        )
+
+        state = self.runner().run()
+
+        self.assertEqual(state["observation_count"], 2)
+        self.assertNotIn("corroboration_count", state)
+        self.assertNotIn("confirmed_development", state)
+        self.assertNotIn("hypothesis_status", state)
 
     def test_incremental_equals_rebuild(self):
         parent = self.source()
