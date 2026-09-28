@@ -1,3 +1,10 @@
+"""Disposable activation with good provenance and zero mystical glitter.
+
+Activation may feel psychologically interesting later, but here it stays
+mechanical: committed encounters go in, reconstructible numbers come out.
+If the ledger survives, this state can lose a shoe at midnight and come back.
+"""
+
 from dataclasses import dataclass
 from typing import Iterable
 
@@ -13,7 +20,11 @@ class ActivationValue:
 
 
 class CountActivationV1:
-    """Reference projector only: proves encounter -> derived activation."""
+    """Reference projector proving encounter -> derived activation.
+
+    Very Clueless closet computer: count what is actually there, do not invent
+    an outfit because it would complete the look.
+    """
 
     version = "count-activation-v1"
 
