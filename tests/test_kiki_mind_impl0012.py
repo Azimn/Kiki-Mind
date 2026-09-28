@@ -1,3 +1,9 @@
+"""Code knives for the canonical wall.
+
+These probes make sure a broken or counterfeit append-only trigger cannot stroll
+past verification just because it is wearing the right name tag.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path

@@ -1,3 +1,9 @@
+"""Implementation 002 hostile probes.
+
+Code knives stay out until the shadow brain proves it can be deleted, replayed,
+caught lying, caught lagging, and rebuilt without touching canonical history.
+"""
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
