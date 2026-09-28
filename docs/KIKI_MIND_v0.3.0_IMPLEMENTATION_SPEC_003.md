@@ -78,7 +78,19 @@ V1 phases are:
 - `declined`;
 - `expired_unresolved`.
 
-A non-initial phase must name a real prior commitment event from the same commitment lineage and include it as a causal parent.
+Each `commitment_id` has exactly one `made` root.
+
+The lineage is linear. A non-initial phase must name the current head event from the same commitment lineage and include it as a causal parent. A prior event may have only one child.
+
+V1 transition rules are explicit:
+
+- `made -> revised | fulfilled | declined | expired_unresolved`;
+- `revised -> revised | fulfilled | declined | expired_unresolved`;
+- `fulfilled`, `declined`, and `expired_unresolved` are terminal.
+
+A commitment reopened after a terminal phase must use a new `commitment_id`. The old lifecycle remains intact as history.
+
+The evidence index also fails closed if malformed canonical history ever presents multiple roots or a fork, rather than selecting one branch by write order.
 
 The canonical record may say that fulfillment occurred.
 
@@ -133,9 +145,13 @@ If such a concept becomes useful later, it belongs in a versioned derived projec
 
 ## Canonical experience restriction
 
-Evidence carrying `forbid_canonical_experience` cannot become a developmental observation.
+A developmental proposal carrying `forbid_canonical_experience` cannot become a developmental observation.
 
-A renderer does not get to convert restricted source material into Kiki autobiography by calling it developmental evidence.
+Implementation 003.1 also propagates that boundary through explicit causal parents: if any named causal parent carries `forbid_canonical_experience`, the developmental observation is rejected.
+
+This closes the mechanically visible ancestry path. It does not claim that the gate can semantically detect a renderer copying restricted content into free text without declaring the source relationship. Proposal construction and undeclared semantic quotation remain trust boundaries.
+
+A renderer does not get a mechanically supported path to convert restricted source material into Kiki autobiography by calling it developmental evidence.
 
 ## Developmental Evidence Index V1
 
@@ -147,7 +163,7 @@ It derives:
 - source event IDs grouped by observation kind;
 - source event IDs grouped by renderer;
 - minimal trace entries containing event ID, sequence, observation kind, renderer, model, provider, runtime, and modality;
-- commitment event lineage and latest recorded explicit phase.
+- linear commitment event lineage, head event ID, and latest recorded explicit phase.
 
 It deliberately does not copy self-report text into the projection.
 
@@ -163,13 +179,32 @@ It deliberately does not calculate:
 
 The projector is a Rolodex for receipts, not a horoscope.
 
-## Prediction firewall
+## Prediction firewall: normative in v0.3.0
 
-Predictions receive zero canonical privilege.
+Predictions receive zero intended evidentiary privilege.
 
-A prediction that Kiki may become more confident does not become evidence if a later renderer produces confident behavior.
+The current gate can enforce structured fields, ancestry, attribution, restrictions, and declared context. It cannot read the semantics of free text.
 
-Later evidence must stand on its own provenance and opportunity context.
+That creates a known open problem: a self-report can semantically echo an earlier hypothesis or earlier self-report while still being a valid canonical record that the report occurred.
+
+For example:
+
+1. Kiki reports, "I feel more confident lately."
+2. A later renderer says, "My earlier confidence reports prove I am genuinely growing."
+3. Both are canonical self-report receipts if they satisfy the structural gate.
+
+Implementation 003 does not mechanically classify the second report as fresh corroboration, hypothesis echo, or independent evidence.
+
+Therefore:
+
+- `observation_count` is a receipt count, not corroboration;
+- repeated self-reports are not automatically independent evidence;
+- the evidence index emits no corroboration count, confirmed-development flag, or hypothesis status;
+- future developmental analysis must trace causal and renderer context rather than treating repeated language as confirmation.
+
+A mechanical firewall would require additional architecture, such as a canonical derived-claim or interpretation event that later echo-reports can explicitly reference. That is not implemented in 003.
+
+The firewall is therefore a normative analysis rule plus a deliberately non-interpretive index, not a semantic proof enforced by the gate.
 
 ## Matched-opportunity principle
 
@@ -195,11 +230,14 @@ Implementation 003 must prove that:
 6. missing renderer/runtime context fails closed rather than being guessed;
 7. extra psychological or predictive fields fail closed;
 8. choices require explicit opportunity accounting;
-9. commitment lifecycle events preserve real lineage;
-10. corrections preserve causal links to corrected and supporting evidence;
-11. model and renderer changes remain visible in derived evidence;
-12. the evidence index contains traceability but no psychological conclusion;
-13. incremental projection equals full rebuild.
+9. each commitment ID has one root and one linear child chain;
+10. terminal commitment phases cannot be silently reopened;
+11. corrections preserve causal links to corrected and supporting evidence;
+12. restricted causal parents cannot feed canonical developmental observations;
+13. model and renderer changes remain visible in derived evidence;
+14. the evidence index contains traceability but no psychological conclusion;
+15. semantic echo self-reports are never marked as corroboration by the index;
+16. incremental projection equals full rebuild.
 
 ## Explicit non-goals
 
