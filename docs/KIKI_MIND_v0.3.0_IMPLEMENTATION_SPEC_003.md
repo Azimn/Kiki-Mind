@@ -106,9 +106,14 @@ Every developmental observation carries an exact v1 context object with these fi
 - `platform_affordances`;
 - `initiative_possible`;
 - `refusal_policy_constrained`;
-- `explicit_user_request`.
+- `explicit_user_request`;
+- `context_provenance`.
 
 Unknown scalar context remains `null`.
+
+`context_provenance` must explicitly identify the context basis as `runtime_supplied`, `operator_supplied`, `renderer_declared`, `mixed`, or `unknown`.
+
+This is still declared metadata, not independent proof that every affordance claim is true. Later analysis can distinguish stronger runtime/operator context from renderer-declared or unknown context instead of pretending all context has equal evidentiary weight.
 
 Unknown context is not backfilled by inference.
 
@@ -142,7 +147,7 @@ It derives:
 - source event IDs grouped by observation kind;
 - source event IDs grouped by renderer;
 - minimal trace entries containing event ID, sequence, observation kind, renderer, model, provider, runtime, and modality;
-- commitment event lineage and latest explicit phase.
+- commitment event lineage and latest recorded explicit phase.
 
 It deliberately does not copy self-report text into the projection.
 

@@ -43,6 +43,14 @@ class DevelopmentalObservationKind(str, Enum):
     CORRECTION = "correction"
 
 
+class DevelopmentalContextProvenance(str, Enum):
+    RUNTIME_SUPPLIED = "runtime_supplied"
+    OPERATOR_SUPPLIED = "operator_supplied"
+    RENDERER_DECLARED = "renderer_declared"
+    MIXED = "mixed"
+    UNKNOWN = "unknown"
+
+
 class EpistemicClass(str, Enum):
     SOURCE_EVIDENCE = "source_evidence"
     AUTHORED_IDENTITY = "authored_identity"

@@ -52,7 +52,9 @@ class DevelopmentalEvidenceIndexV1:
             "commitments": {
                 key: {
                     "event_ids": list(value["event_ids"]),
-                    "latest_phase": value["latest_phase"],
+                    "latest_recorded_phase": value[
+                        "latest_recorded_phase"
+                    ],
                 }
                 for key, value in state["commitments"].items()
             },
@@ -79,6 +81,7 @@ class DevelopmentalEvidenceIndexV1:
             "provider_id": context["provider_id"],
             "runtime_id": context["runtime_id"],
             "modality": context["modality"],
+            "context_provenance": context["context_provenance"],
         }
 
         result["observation_count"] += 1
@@ -101,7 +104,7 @@ class DevelopmentalEvidenceIndexV1:
             event_ids.append(event.event_id)
             result["commitments"][commitment_id] = {
                 "event_ids": event_ids,
-                "latest_phase": str(event.payload["phase"]),
+                "latest_recorded_phase": str(event.payload["phase"]),
             }
 
         return result

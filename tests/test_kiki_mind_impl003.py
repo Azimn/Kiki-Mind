@@ -17,6 +17,7 @@ from runtime.kiki_mind.models import (
     AncestryEdge,
     ClaimDomain,
     DerivationMode,
+    DevelopmentalContextProvenance,
     DevelopmentalObservationKind,
     EpistemicClass,
     EventProposal,
@@ -93,6 +94,8 @@ class KikiMindImplementation003Tests(unittest.TestCase):
             "initiative_possible": initiative_possible,
             "refusal_policy_constrained": refusal_policy_constrained,
             "explicit_user_request": explicit_user_request,
+            "context_provenance":
+                DevelopmentalContextProvenance.RUNTIME_SUPPLIED.value,
         }
 
     def observation(
@@ -262,6 +265,36 @@ class KikiMindImplementation003Tests(unittest.TestCase):
                     "confidence_score": 0.92,
                 },
             )
+
+    def test_context_provenance_is_explicit_and_typed(self):
+        parent = self.source()
+        bad_context = self.context()
+        bad_context["context_provenance"] = "vibes"
+
+        with self.assertRaises(GateRejected):
+            self.observation(
+                parent,
+                payload={
+                    "report_text": "I feel fine.",
+                    "context": bad_context,
+                },
+            )
+
+        unknown_context = self.context()
+        unknown_context["context_provenance"] = (
+            DevelopmentalContextProvenance.UNKNOWN.value
+        )
+        accepted = self.observation(
+            parent,
+            payload={
+                "report_text": "Context source is unknown.",
+                "context": unknown_context,
+            },
+        )
+        self.assertEqual(
+            accepted.payload["context"]["context_provenance"],
+            DevelopmentalContextProvenance.UNKNOWN.value,
+        )
 
     def test_context_lists_reject_duplicates_and_empty_labels(self):
         parent = self.source()
@@ -536,7 +569,10 @@ class KikiMindImplementation003Tests(unittest.TestCase):
         state = self.runner().run()
         commitment = state["commitments"]["c-1"]
 
-        self.assertEqual(commitment["latest_phase"], "fulfilled")
+        self.assertEqual(
+            commitment["latest_recorded_phase"],
+            "fulfilled",
+        )
         self.assertEqual(len(commitment["event_ids"]), 2)
         self.assertNotIn("reliability_score", commitment)
         self.assertNotIn("maturity", commitment)

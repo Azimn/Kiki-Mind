@@ -15,6 +15,7 @@ from .models import (
     ActorKind,
     ClaimDomain,
     DerivationMode,
+    DevelopmentalContextProvenance,
     DevelopmentalObservationKind,
     EpistemicClass,
     EventProposal,
@@ -504,6 +505,7 @@ class TransitionGate:
             "initiative_possible",
             "refusal_policy_constrained",
             "explicit_user_request",
+            "context_provenance",
         }
         actual_context_keys = set(context)
         if actual_context_keys != context_keys:
@@ -546,6 +548,13 @@ class TransitionGate:
                 context[key], bool
             ):
                 fail(f"developmental context {key} must be bool or null")
+
+        try:
+            DevelopmentalContextProvenance(
+                context["context_provenance"]
+            )
+        except (TypeError, ValueError):
+            fail("developmental context provenance is invalid")
 
         common = {"observation_kind", "context"}
         schemas = {
