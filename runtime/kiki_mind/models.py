@@ -28,11 +28,19 @@ class EventType(str, Enum):
     INTERPRETATION_RECORDED = "interpretation.recorded"
     ENCOUNTER_RECORDED = "encounter.recorded"
     NEGATIVE_SPACE_RECORDED = "negative_space.recorded"
+    DEVELOPMENTAL_OBSERVATION_RECORDED = "developmental.observation.recorded"
     OPERATOR_LEASE_GRANTED = "governance.operator_lease.granted"
     OPERATOR_LEASE_RENEWED = "governance.operator_lease.renewed"
     CANONICAL_ENDORSEMENT_PROPOSED = "lineage.canonical_endorsement.proposed"
     CANONICAL_ENDORSEMENT_AUTHORIZED = "lineage.canonical_endorsement.authorized"
     ACTIVATION_SET = "activation.set"
+
+
+class DevelopmentalObservationKind(str, Enum):
+    SELF_REPORT = "self_report"
+    CHOICE = "choice"
+    COMMITMENT = "commitment"
+    CORRECTION = "correction"
 
 
 class EpistemicClass(str, Enum):
@@ -46,6 +54,7 @@ class EpistemicClass(str, Enum):
     DERIVED_RESIDUE = "derived_residue"
     GOVERNANCE = "governance"
     RENDERER_METADATA = "renderer_metadata"
+    DEVELOPMENTAL_OBSERVATION = "developmental_observation"
 
 
 class ClaimDomain(str, Enum):
@@ -55,6 +64,7 @@ class ClaimDomain(str, Enum):
     INTERNAL_INTERPRETATION = "internal_interpretation"
     GOVERNANCE = "governance"
     RENDERER_METADATA = "renderer_metadata"
+    DEVELOPMENTAL_EVIDENCE = "developmental_evidence"
 
 
 class Restriction(str, Enum):
@@ -88,7 +98,7 @@ class EventProposal:
     content_restrictions: frozenset[Restriction] = field(default_factory=frozenset)
     renderer_mediated: bool = False
     renderer_id: str | None = None
-    policy_version: str = "kiki-mind-v0.2.2"
+    policy_version: str = "kiki-mind-v0.3.0"
     idempotency_key: str | None = None
 
 
