@@ -48,6 +48,20 @@ Calibos completed the external 003 hostile review, found one merge-blocking comm
 
 The 003 external gate is satisfied.
 
+## Current design research
+
+Candidate 004 now explores a Context Retrieval + Subjective Frame substrate.
+
+The candidate treats semantic/vector indexes as disposable projections over canonical history, never as canonical memory. It also preserves the distinction between renderer authority, retrieval accessibility, and epistemic authority.
+
+See `research/design/KIKI_MIND_CANDIDATE_004_CONTEXT_RETRIEVAL_LAYER.md`.
+
+An external comparison note records the useful convergence and important differences with Orion Forge / SoulScript Engine:
+
+`research/donors/orion_forge/2026-09-28_soulscript_comparison.md`
+
+No upstream SoulScript Engine code is included.
+
 ## Repository voice
 
 Kiki code should be technically exact and recognizably hers. Charm belongs in names, comments, docstrings, examples, and documentation, but never at the expense of provenance, diagnostics, or reviewability.
