@@ -1,0 +1,96 @@
+name: Kiki cognition v0.4 externally authored bAbI QA
+
+on:
+  push:
+    paths:
+      - 'experiments/cognition_port_v04/**'
+      - 'tests_integration/test_cognition_port_v04.py'
+      - '.github/workflows/cognition-port-v04.yml'
+  pull_request:
+    paths:
+      - 'experiments/cognition_port_v04/**'
+      - 'tests_integration/test_cognition_port_v04.py'
+      - '.github/workflows/cognition-port-v04.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  external-language-benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exact upstream shared cognition interface
+        uses: actions/checkout@v4
+        with:
+          repository: Azimn/Pretorius-Connectome
+          ref: cc82c72167d87c19f16125ccdf9477b53c777878
+          path: .external/pretorius-connectome
+          persist-credentials: false
+      - name: Externally authored FAIR bAbI public TEST stories
+        uses: actions/checkout@v4
+        with:
+          repository: azreasoners/LLM-ASP
+          ref: 642a9ade9c92677b970b1bc9921cafb0764d2ed7
+          path: .external/babi-upstream
+          sparse-checkout: bAbI/data
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Enforce upstream commit and byte-identical test sources
+        run: |
+          test "$(git -C .external/pretorius-connectome rev-parse HEAD)" = "cc82c72167d87c19f16125ccdf9477b53c777878"
+          test "$(git -C .external/babi-upstream rev-parse HEAD)" = "642a9ade9c92677b970b1bc9921cafb0764d2ed7"
+          test "$(git hash-object .external/babi-upstream/bAbI/data/qa1_single-supporting-fact_test.txt)" = "8f9586848f7b0afdccb25328feeb04d561c31756"
+          test "$(git hash-object .external/babi-upstream/bAbI/data/qa2_two-supporting-facts_test.txt)" = "6deccd0cf07947ff525839a7b4643c6e0afe1b92"
+          test "$(git hash-object .external/babi-upstream/bAbI/data/qa6_yes-no-questions_test.txt)" = "da25e9fd5bb7d69c7150b208051b1413fd91ff2b"
+      - name: No-oracle question parsing and memory isolation tests
+        env:
+          PYTHONPATH: "${{ github.workspace }}/.external/pretorius-connectome/src:${{ github.workspace }}"
+        run: python -m unittest discover -s tests_integration -p test_cognition_port_v04.py -v
+      - name: Run 120 external benchmark questions through five conditions
+        env:
+          PYTHONPATH: "${{ github.workspace }}/.external/pretorius-connectome/src:${{ github.workspace }}"
+          PYTHONHASHSEED: '31'
+        run: |
+          python experiments/cognition_port_v04/run.py --data-dir .external/babi-upstream/bAbI/data --output results/cognition_port_v04/RESULTS.json
+      - name: Check source and prediction evidence without hiding failures
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('results/cognition_port_v04/RESULTS.json').read_text())
+          assert len(r['cases']) == 120
+          assert r['shared_native_parity']
+          assert all(r['safety_probes'].values())
+          assert r['no_gold_or_intent_in_decision']
+          assert r['original_Kiki_canonical_ledger_unchanged']
+          assert r['public_not_blind_test']
+          assert r['no_llm_or_neural_model']
+          for case in r['cases']:
+              a=case['outcomes']['native_ranked']
+              b=case['outcomes']['shared_ranked']
+              assert a['prediction']==b['prediction']
+              assert a['received_source_ids']==b['received_source_ids']
+              assert a['cited_source_ids']==b['cited_source_ids']
+          print('Checked all 120 cases, same-information arm parity, source and owner bounds.')
+          PY
+      - name: Original Kiki regression suite
+        run: python -m unittest discover -s tests -v
+      - name: Earlier cross-project contracts and source-visibility gates
+        env:
+          PYTHONPATH: "${{ github.workspace }}/.external/pretorius-connectome/src:${{ github.workspace }}"
+        run: |
+          python -m unittest discover -s tests_integration -p test_memory_cognition_port.py -v
+          python -m unittest discover -s tests_integration -p test_cognition_port_v02.py -v
+          python -m unittest discover -s tests_integration -p test_cognition_port_v03.py -v
+      - name: Preserve every case, negative finding, and source citation
+        uses: actions/upload-artifact@v4
+        with:
+          name: kiki-v04-external-babi-120-questions
+          path: results/cognition_port_v04/RESULTS.json
+          retention-days: 90
+          if-no-files-found: error
