@@ -1,0 +1,77 @@
+name: Kiki cognition v0.3 synthetic content pilot
+
+on:
+  push:
+    paths:
+      - 'experiments/cognition_port_v03/**'
+      - 'tests_integration/test_cognition_port_v03.py'
+      - '.github/workflows/cognition-port-v03.yml'
+  pull_request:
+    paths:
+      - 'experiments/cognition_port_v03/**'
+      - 'tests_integration/test_cognition_port_v03.py'
+      - '.github/workflows/cognition-port-v03.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-content-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pin source-owned cognition interface
+        uses: actions/checkout@v4
+        with:
+          repository: Azimn/Pretorius-Connectome
+          ref: cc82c72167d87c19f16125ccdf9477b53c777878
+          path: .external/pretorius-connectome
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify unchanged trusted interface
+        run: |
+          test "$(git -C .external/pretorius-connectome rev-parse HEAD)" = "cc82c72167d87c19f16125ccdf9477b53c777878"
+      - name: Source-authored synthetic content safety and behavior tests
+        env:
+          PYTHONPATH: "${{ github.workspace }}/.external/pretorius-connectome/src:${{ github.workspace }}"
+          PYTHONHASHSEED: '103'
+        run: |
+          python -m unittest discover -s tests_integration -p test_cognition_port_v03.py -v
+          python experiments/cognition_port_v03/run.py --output results/cognition_port_v03/RESULTS.json
+      - name: Fail closed on owner/provenance leak
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('results/cognition_port_v03/RESULTS.json').read_text())
+          assert p['shared_direct_parity']
+          assert all(p['probes'].values())
+          assert not p['independently_blinded']
+          assert p['oracle_intent_parsing']
+          assert p['conclusions_limited_to_engineering_pilot']
+          for condition, cases in p['cases'].items():
+            assert len(cases) == 36
+            for case in cases:
+              assert 'D21' not in case['received_ids']
+              assert 'D22' not in case['received_ids']
+          print('Synthetic content pilot completed; independent evaluation remains unverified.')
+          PY
+      - name: Existing original Kiki regression
+        run: python -m unittest discover -s tests -v
+      - name: v0.1 and v0.2 cross-project compatibility
+        env:
+          PYTHONPATH: "${{ github.workspace }}/.external/pretorius-connectome/src:${{ github.workspace }}"
+        run: |
+          python -m unittest discover -s tests_integration -p test_memory_cognition_port.py -v
+          python -m unittest discover -s tests_integration -p test_cognition_port_v02.py -v
+      - name: Archive true case-level data
+        uses: actions/upload-artifact@v4
+        with:
+          name: kiki-synthetic-content-v03-source-gate
+          path: results/cognition_port_v03/RESULTS.json
+          if-no-files-found: error
+          retention-days: 90
