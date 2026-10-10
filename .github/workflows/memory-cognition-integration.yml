@@ -1,0 +1,47 @@
+name: Kiki memory-to-cognition interoperability
+
+on:
+  push:
+    paths:
+      - 'runtime/kiki_mind/cognition_adapter.py'
+      - 'tests_integration/test_memory_cognition_port.py'
+      - 'docs/KIKI_MEMORY_COGNITION_PORT_V0_1.md'
+      - '.github/workflows/memory-cognition-integration.yml'
+  pull_request:
+    paths:
+      - 'runtime/kiki_mind/cognition_adapter.py'
+      - 'tests_integration/test_memory_cognition_port.py'
+      - 'docs/KIKI_MEMORY_COGNITION_PORT_V0_1.md'
+      - '.github/workflows/memory-cognition-integration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-ledger-port:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Get Kiki Mind
+        uses: actions/checkout@v4
+      - name: Get source-owned shared memory port at exact verified release
+        uses: actions/checkout@v4
+        with:
+          repository: Azimn/Pretorius-Connectome
+          ref: cc82c72167d87c19f16125ccdf9477b53c777878
+          path: .external/pretorius-connectome
+          persist-credentials: false
+      - name: Python standard library
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check exact external source pin
+        run: |
+          test "$(git -C .external/pretorius-connectome rev-parse HEAD)" = "cc82c72167d87c19f16125ccdf9477b53c777878"
+      - name: Two-project source isolation and Kiki read-only ledger tests
+        env:
+          PYTHONPATH: "${{ github.workspace }}/.external/pretorius-connectome/src:${{ github.workspace }}"
+        run: python -m unittest discover -s tests_integration -p 'test_memory_cognition_port.py' -v
+      - name: Existing Kiki tests without modifying canonical event policy
+        run: python -m unittest discover -s tests -v
