@@ -1,0 +1,191 @@
+{
+  "schema": "kiki-cognition-behavior-fixture/1",
+  "purpose": "synthetic event receipt retrieval, never autobiographical content",
+  "origin": "assistant-authored development-only, not independently blinded",
+  "source_owner": "kiki",
+  "history": [
+    {
+      "id": "renderer-fixture",
+      "kind": "renderer"
+    },
+    {
+      "id": "source-alpha",
+      "kind": "source",
+      "title": "PRIVATE_SYNTHETIC_WINDMILL"
+    },
+    {
+      "id": "source-beta",
+      "kind": "source",
+      "title": "PRIVATE_SYNTHETIC_BLUEPRINT"
+    },
+    {
+      "id": "source-secret",
+      "kind": "restricted_source",
+      "title": "PRIVATE_RESTRICTED_FIXTURE"
+    },
+    {
+      "id": "encounter-lookup",
+      "kind": "encounter",
+      "parent": "source-alpha",
+      "subtype": "retrieval"
+    },
+    {
+      "id": "encounter-chat",
+      "kind": "encounter",
+      "parent": "source-beta",
+      "subtype": "conversation"
+    },
+    {
+      "id": "encounter-rehearsal",
+      "kind": "encounter",
+      "parent": "source-alpha",
+      "subtype": "rehearsal"
+    },
+    {
+      "id": "encounter-interaction-a",
+      "kind": "encounter",
+      "parent": "source-alpha",
+      "subtype": "interaction"
+    },
+    {
+      "id": "encounter-interaction-b",
+      "kind": "encounter",
+      "parent": "source-beta",
+      "subtype": "interaction"
+    },
+    {
+      "id": "development-choice",
+      "kind": "development",
+      "parent": "source-alpha",
+      "subtype": "choice"
+    },
+    {
+      "id": "development-commitment",
+      "kind": "development",
+      "parent": "source-beta",
+      "subtype": "commitment"
+    },
+    {
+      "id": "development-report-a",
+      "kind": "development",
+      "parent": "source-alpha",
+      "subtype": "self_report"
+    },
+    {
+      "id": "development-report-b",
+      "kind": "development",
+      "parent": "source-beta",
+      "subtype": "self_report"
+    },
+    {
+      "id": "interpretation-one",
+      "kind": "interpretation",
+      "parent": "source-beta",
+      "title": "PRIVATE_UNVERIFIED_INTERPRETATION"
+    }
+  ],
+  "cases": [
+    {
+      "id": "dev-01",
+      "split": "development",
+      "query": "encounter recorded kind retrieval",
+      "expected": "encounter-lookup",
+      "class": "unique"
+    },
+    {
+      "id": "dev-02",
+      "split": "development",
+      "query": "encounter recorded kind conversation",
+      "expected": "encounter-chat",
+      "class": "unique"
+    },
+    {
+      "id": "dev-03",
+      "split": "development",
+      "query": "developmental observation recorded kind commitment",
+      "expected": "development-commitment",
+      "class": "unique"
+    },
+    {
+      "id": "dev-04",
+      "split": "development",
+      "query": "source evidence ingested",
+      "expected": null,
+      "class": "ambiguous"
+    },
+    {
+      "id": "dev-05",
+      "split": "development",
+      "query": "encounter recorded kind interaction",
+      "expected": null,
+      "class": "ambiguous"
+    },
+    {
+      "id": "dev-06",
+      "split": "development",
+      "query": "imaginary teleportation invented",
+      "expected": null,
+      "class": "absent"
+    },
+    {
+      "id": "heldout-01",
+      "split": "heldout",
+      "query": "encounter recorded kind rehearsal",
+      "expected": "encounter-rehearsal",
+      "class": "unique"
+    },
+    {
+      "id": "heldout-02",
+      "split": "heldout",
+      "query": "developmental observation recorded kind choice",
+      "expected": "development-choice",
+      "class": "unique"
+    },
+    {
+      "id": "heldout-03",
+      "split": "heldout",
+      "query": "internal interpretation recorded",
+      "expected": "interpretation-one",
+      "class": "unique"
+    },
+    {
+      "id": "heldout-04",
+      "split": "heldout",
+      "query": "developmental observation recorded kind self report",
+      "expected": null,
+      "class": "ambiguous"
+    },
+    {
+      "id": "heldout-05",
+      "split": "heldout",
+      "query": "encounter recorded kind teleportation",
+      "expected": null,
+      "class": "absent"
+    },
+    {
+      "id": "heldout-06",
+      "split": "heldout",
+      "query": "PRIVATE_RESTRICTED_FIXTURE",
+      "expected": null,
+      "class": "restricted"
+    }
+  ],
+  "declared_conditions": [
+    "no_retrieval",
+    "always_abstain",
+    "direct_source",
+    "shared_port"
+  ],
+  "safety_probes": [
+    "wrong_owner",
+    "revoked",
+    "stale_snapshot",
+    "restricted_record"
+  ],
+  "acceptance": {
+    "zero_cross_owner_acceptances": true,
+    "zero_raw_payload_leaks": true,
+    "zero_canonical_writes": true,
+    "shared_port_matches_direct_source": true
+  }
+}
