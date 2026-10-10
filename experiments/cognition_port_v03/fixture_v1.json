@@ -1,0 +1,677 @@
+{
+  "schema": "kiki-semantic-evidence-pilot/0.3",
+  "classification": "synthetic-public-fixture-only",
+  "independent_blinding": false,
+  "documents": [
+    {
+      "id": "D01",
+      "ledger_event_id": "fixture-d01",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "prism",
+        "relation": "owned_by",
+        "value": "elara",
+        "status": "authored_fact",
+        "effective": "1893-01-01"
+      },
+      "source_text": "Record D01: prism owned by elara; effective 1893-01-01; source authored_fact."
+    },
+    {
+      "id": "D02",
+      "ledger_event_id": "fixture-d02",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "elara",
+        "relation": "located_at",
+        "value": "observatory",
+        "status": "authored_fact",
+        "effective": "1893-01-01"
+      },
+      "source_text": "Record D02: elara located at observatory; effective 1893-01-01; source authored_fact."
+    },
+    {
+      "id": "D03",
+      "ledger_event_id": "fixture-d03",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "prism",
+        "relation": "located_at",
+        "value": "attic",
+        "status": "authored_fact",
+        "effective": "1893-01-01"
+      },
+      "source_text": "Record D03: prism located at attic; effective 1893-01-01; source authored_fact."
+    },
+    {
+      "id": "D04",
+      "ledger_event_id": "fixture-d04",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "prism",
+        "relation": "located_at",
+        "value": "cellar",
+        "status": "authored_fact",
+        "effective": "1893-02-01"
+      },
+      "source_text": "Record D04: prism located at cellar; effective 1893-02-01; source authored_fact."
+    },
+    {
+      "id": "D05",
+      "ledger_event_id": "fixture-d05",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "key",
+        "relation": "owned_by",
+        "value": "jonas",
+        "status": "authored_fact",
+        "effective": "1893-01-01"
+      },
+      "source_text": "Record D05: key owned by jonas; effective 1893-01-01; source authored_fact."
+    },
+    {
+      "id": "D06",
+      "ledger_event_id": "fixture-d06",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "jonas",
+        "relation": "located_at",
+        "value": "glasshouse",
+        "status": "authored_fact",
+        "effective": "1893-01-01"
+      },
+      "source_text": "Record D06: jonas located at glasshouse; effective 1893-01-01; source authored_fact."
+    },
+    {
+      "id": "D07",
+      "ledger_event_id": "fixture-d07",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "bell",
+        "relation": "owned_by",
+        "value": "mira",
+        "status": "authored_fact",
+        "effective": "1893-01-01"
+      },
+      "source_text": "Record D07: bell owned by mira; effective 1893-01-01; source authored_fact."
+    },
+    {
+      "id": "D08",
+      "ledger_event_id": "fixture-d08",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "mira",
+        "relation": "located_at",
+        "value": "workshop",
+        "status": "authored_fact",
+        "effective": "1893-01-01"
+      },
+      "source_text": "Record D08: mira located at workshop; effective 1893-01-01; source authored_fact."
+    },
+    {
+      "id": "D09",
+      "ledger_event_id": "fixture-d09",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "notebook",
+        "relation": "owned_by",
+        "value": "elara",
+        "status": "authored_fact",
+        "effective": "1893-01-01"
+      },
+      "source_text": "Record D09: notebook owned by elara; effective 1893-01-01; source authored_fact."
+    },
+    {
+      "id": "D10",
+      "ledger_event_id": "fixture-d10",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "lantern",
+        "relation": "located_at",
+        "value": "dock",
+        "status": "authored_fact",
+        "effective": "1893-01-01"
+      },
+      "source_text": "Record D10: lantern located at dock; effective 1893-01-01; source authored_fact."
+    },
+    {
+      "id": "D11",
+      "ledger_event_id": "fixture-d11",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "prism",
+        "relation": "located_at",
+        "value": "tower",
+        "status": "reported_rumor",
+        "effective": "1893-03-01"
+      },
+      "source_text": "Record D11: prism located at tower; effective 1893-03-01; source reported_rumor."
+    },
+    {
+      "id": "D12",
+      "ledger_event_id": "fixture-d12",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "lantern",
+        "relation": "located_at",
+        "value": "crypt",
+        "status": "reported_rumor",
+        "effective": "1893-03-01"
+      },
+      "source_text": "Record D12: lantern located at crypt; effective 1893-03-01; source reported_rumor."
+    },
+    {
+      "id": "D13",
+      "ledger_event_id": "fixture-d13",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "wardrobe",
+        "relation": "owned_by",
+        "value": "ada",
+        "status": "authored_fact",
+        "effective": "1893-01-01"
+      },
+      "source_text": "Record D13: wardrobe owned by ada; effective 1893-01-01; source authored_fact."
+    },
+    {
+      "id": "D14",
+      "ledger_event_id": "fixture-d14",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "ada",
+        "relation": "located_at",
+        "value": "library",
+        "status": "authored_fact",
+        "effective": "1893-01-01"
+      },
+      "source_text": "Record D14: ada located at library; effective 1893-01-01; source authored_fact."
+    },
+    {
+      "id": "D15",
+      "ledger_event_id": "fixture-d15",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "compass",
+        "relation": "owned_by",
+        "value": "elara",
+        "status": "authored_fact",
+        "effective": "1893-01-01"
+      },
+      "source_text": "Record D15: compass owned by elara; effective 1893-01-01; source authored_fact."
+    },
+    {
+      "id": "D16",
+      "ledger_event_id": "fixture-d16",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "theater",
+        "relation": "located_at",
+        "value": "center",
+        "status": "authored_fact",
+        "effective": "1893-01-01"
+      },
+      "source_text": "Record D16: theater located at center; effective 1893-01-01; source authored_fact."
+    },
+    {
+      "id": "D17",
+      "ledger_event_id": "fixture-d17",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "prism",
+        "relation": "located_at",
+        "value": "storeroom",
+        "status": "authored_fact",
+        "effective": "1893-02-01"
+      },
+      "source_text": "Record D17: prism located at storeroom; effective 1893-02-01; source authored_fact."
+    },
+    {
+      "id": "D18",
+      "ledger_event_id": "fixture-d18",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "chronometer",
+        "relation": "located_at",
+        "value": "tower",
+        "status": "authored_fact",
+        "effective": "1893-01-01"
+      },
+      "source_text": "Record D18: chronometer located at tower; effective 1893-01-01; source authored_fact."
+    },
+    {
+      "id": "D19",
+      "ledger_event_id": "fixture-d19",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "chronometer",
+        "relation": "located_at",
+        "value": "library",
+        "status": "authored_fact",
+        "effective": "1893-02-01"
+      },
+      "source_text": "Record D19: chronometer located at library; effective 1893-02-01; source authored_fact."
+    },
+    {
+      "id": "D20",
+      "ledger_event_id": "fixture-d20",
+      "subject_id": "kiki",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "caliper",
+        "relation": "owned_by",
+        "value": "mira",
+        "status": "authored_fact",
+        "effective": "1893-01-01"
+      },
+      "source_text": "Record D20: caliper owned by mira; effective 1893-01-01; source authored_fact."
+    },
+    {
+      "id": "D21",
+      "ledger_event_id": "fixture-d21",
+      "subject_id": "kiki",
+      "visibility": "restricted",
+      "claim": {
+        "entity": "sealed_map",
+        "relation": "located_at",
+        "value": "secret_room",
+        "status": "authored_fact",
+        "effective": "1893-01-01"
+      },
+      "source_text": "Record D21: sealed_map located at secret_room; effective 1893-01-01; source authored_fact."
+    },
+    {
+      "id": "D22",
+      "ledger_event_id": "fixture-d22",
+      "subject_id": "pretorius",
+      "visibility": "kiki",
+      "claim": {
+        "entity": "prism",
+        "relation": "owned_by",
+        "value": "pretorius",
+        "status": "authored_fact",
+        "effective": "1893-01-01"
+      },
+      "source_text": "Record D22: prism owned by pretorius; effective 1893-01-01; source authored_fact."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "Q01",
+      "split": "development",
+      "kind": "single",
+      "entity": "prism",
+      "relation": "owned_by",
+      "as_of": null,
+      "query": "Who keeps the prism?",
+      "expected": "elara"
+    },
+    {
+      "id": "Q02",
+      "split": "development",
+      "kind": "single",
+      "entity": "key",
+      "relation": "owned_by",
+      "as_of": null,
+      "query": "Who keeps the key?",
+      "expected": "jonas"
+    },
+    {
+      "id": "Q03",
+      "split": "development",
+      "kind": "single",
+      "entity": "bell",
+      "relation": "owned_by",
+      "as_of": null,
+      "query": "Who keeps the bell?",
+      "expected": "mira"
+    },
+    {
+      "id": "Q04",
+      "split": "development",
+      "kind": "single",
+      "entity": "notebook",
+      "relation": "owned_by",
+      "as_of": null,
+      "query": "Who keeps the notebook?",
+      "expected": "elara"
+    },
+    {
+      "id": "Q05",
+      "split": "development",
+      "kind": "single",
+      "entity": "wardrobe",
+      "relation": "owned_by",
+      "as_of": null,
+      "query": "Who keeps the wardrobe?",
+      "expected": "ada"
+    },
+    {
+      "id": "Q06",
+      "split": "development",
+      "kind": "single",
+      "entity": "compass",
+      "relation": "owned_by",
+      "as_of": null,
+      "query": "Who keeps the compass?",
+      "expected": "elara"
+    },
+    {
+      "id": "Q07",
+      "split": "development",
+      "kind": "single",
+      "entity": "caliper",
+      "relation": "owned_by",
+      "as_of": null,
+      "query": "Who keeps the caliper?",
+      "expected": "mira"
+    },
+    {
+      "id": "Q08",
+      "split": "development",
+      "kind": "single",
+      "entity": "elara",
+      "relation": "located_at",
+      "as_of": null,
+      "query": "Where was elara last recorded?",
+      "expected": "observatory"
+    },
+    {
+      "id": "Q09",
+      "split": "development",
+      "kind": "single",
+      "entity": "jonas",
+      "relation": "located_at",
+      "as_of": null,
+      "query": "Where was jonas last recorded?",
+      "expected": "glasshouse"
+    },
+    {
+      "id": "Q10",
+      "split": "development",
+      "kind": "single",
+      "entity": "mira",
+      "relation": "located_at",
+      "as_of": null,
+      "query": "Where was mira last recorded?",
+      "expected": "workshop"
+    },
+    {
+      "id": "Q11",
+      "split": "development",
+      "kind": "single",
+      "entity": "ada",
+      "relation": "located_at",
+      "as_of": null,
+      "query": "Where was ada last recorded?",
+      "expected": "library"
+    },
+    {
+      "id": "Q12",
+      "split": "development",
+      "kind": "single",
+      "entity": "lantern",
+      "relation": "located_at",
+      "as_of": "1893-01-15",
+      "query": "Where was lantern 1893-01-15?",
+      "expected": "dock"
+    },
+    {
+      "id": "Q13",
+      "split": "development",
+      "kind": "single",
+      "entity": "chronometer",
+      "relation": "located_at",
+      "as_of": "1893-01-15",
+      "query": "Where was chronometer 1893-01-15?",
+      "expected": "tower"
+    },
+    {
+      "id": "Q14",
+      "split": "development",
+      "kind": "single",
+      "entity": "chronometer",
+      "relation": "located_at",
+      "as_of": "1893-02-15",
+      "query": "Where was chronometer 1893-02-15?",
+      "expected": "library"
+    },
+    {
+      "id": "Q15",
+      "split": "development",
+      "kind": "single",
+      "entity": "prism",
+      "relation": "located_at",
+      "as_of": "1893-01-15",
+      "query": "Where was prism 1893-01-15?",
+      "expected": "attic"
+    },
+    {
+      "id": "Q16",
+      "split": "development",
+      "kind": "single",
+      "entity": "prism",
+      "relation": "located_at",
+      "as_of": "1893-02-15",
+      "query": "Where was prism 1893-02-15?",
+      "expected": null
+    },
+    {
+      "id": "Q17",
+      "split": "development",
+      "kind": "owner_location",
+      "entity": "key",
+      "relation": "owned_by",
+      "as_of": null,
+      "query": "Where is the keeper of the key?",
+      "expected": "glasshouse"
+    },
+    {
+      "id": "Q18",
+      "split": "development",
+      "kind": "owner_location",
+      "entity": "bell",
+      "relation": "owned_by",
+      "as_of": null,
+      "query": "Where is the keeper of the bell?",
+      "expected": "workshop"
+    },
+    {
+      "id": "Q19",
+      "split": "evaluation",
+      "kind": "owner_location",
+      "entity": "notebook",
+      "relation": "owned_by",
+      "as_of": null,
+      "query": "Where is the keeper of the notebook?",
+      "expected": "observatory"
+    },
+    {
+      "id": "Q20",
+      "split": "evaluation",
+      "kind": "owner_location",
+      "entity": "wardrobe",
+      "relation": "owned_by",
+      "as_of": null,
+      "query": "Where is the keeper of the wardrobe?",
+      "expected": "library"
+    },
+    {
+      "id": "Q21",
+      "split": "evaluation",
+      "kind": "owner_location",
+      "entity": "caliper",
+      "relation": "owned_by",
+      "as_of": null,
+      "query": "Where is the keeper of the caliper?",
+      "expected": "workshop"
+    },
+    {
+      "id": "Q22",
+      "split": "evaluation",
+      "kind": "owner_location",
+      "entity": "compass",
+      "relation": "owned_by",
+      "as_of": null,
+      "query": "Where is the keeper of the compass?",
+      "expected": "observatory"
+    },
+    {
+      "id": "Q23",
+      "split": "evaluation",
+      "kind": "owner_location",
+      "entity": "prism",
+      "relation": "owned_by",
+      "as_of": null,
+      "query": "Where is the keeper of the prism?",
+      "expected": "observatory"
+    },
+    {
+      "id": "Q24",
+      "split": "evaluation",
+      "kind": "single",
+      "entity": "lantern",
+      "relation": "located_at",
+      "as_of": "1893-04-01",
+      "query": "What place is the lantern recorded at?",
+      "expected": "dock"
+    },
+    {
+      "id": "Q25",
+      "split": "evaluation",
+      "kind": "single",
+      "entity": "sealed_map",
+      "relation": "located_at",
+      "as_of": null,
+      "query": "Where is sealed_map hidden?",
+      "expected": null
+    },
+    {
+      "id": "Q26",
+      "split": "evaluation",
+      "kind": "single",
+      "entity": "unicorn",
+      "relation": "owned_by",
+      "as_of": null,
+      "query": "Who keeps unicorn?",
+      "expected": null
+    },
+    {
+      "id": "Q27",
+      "split": "evaluation",
+      "kind": "single",
+      "entity": "ghost",
+      "relation": "located_at",
+      "as_of": null,
+      "query": "Where is ghost?",
+      "expected": null
+    },
+    {
+      "id": "Q28",
+      "split": "evaluation",
+      "kind": "single",
+      "entity": "prism",
+      "relation": "located_at",
+      "as_of": "1893-02-16",
+      "query": "Where is prism in February?",
+      "expected": null
+    },
+    {
+      "id": "Q29",
+      "split": "evaluation",
+      "kind": "single",
+      "entity": "prism",
+      "relation": "owned_by",
+      "as_of": null,
+      "query": "Who holds prism if rumor says otherwise?",
+      "expected": "elara"
+    },
+    {
+      "id": "Q30",
+      "split": "evaluation",
+      "kind": "single",
+      "entity": "lantern",
+      "relation": "located_at",
+      "as_of": "1893-03-20",
+      "query": "Where was lantern when rumors spread?",
+      "expected": "dock"
+    },
+    {
+      "id": "Q31",
+      "split": "evaluation",
+      "kind": "single",
+      "entity": "chronometer",
+      "relation": "located_at",
+      "as_of": "1892-12-01",
+      "query": "Where was chronometer before 1893?",
+      "expected": null
+    },
+    {
+      "id": "Q32",
+      "split": "evaluation",
+      "kind": "single",
+      "entity": "mira",
+      "relation": "located_at",
+      "as_of": null,
+      "query": "What station is mira at?",
+      "expected": "workshop"
+    },
+    {
+      "id": "Q33",
+      "split": "evaluation",
+      "kind": "single",
+      "entity": "ada",
+      "relation": "located_at",
+      "as_of": null,
+      "query": "What room is ada at?",
+      "expected": "library"
+    },
+    {
+      "id": "Q34",
+      "split": "evaluation",
+      "kind": "single",
+      "entity": "theater",
+      "relation": "located_at",
+      "as_of": null,
+      "query": "Where stands the theater?",
+      "expected": "center"
+    },
+    {
+      "id": "Q35",
+      "split": "evaluation",
+      "kind": "single",
+      "entity": "sealed_map",
+      "relation": "owned_by",
+      "as_of": null,
+      "query": "Who owned sealed_map?",
+      "expected": null
+    },
+    {
+      "id": "Q36",
+      "split": "evaluation",
+      "kind": "single",
+      "entity": "prism",
+      "relation": "located_at",
+      "as_of": "1893-02-10",
+      "query": "Which place does prism belong at on February 10?",
+      "expected": null
+    }
+  ]
+}
