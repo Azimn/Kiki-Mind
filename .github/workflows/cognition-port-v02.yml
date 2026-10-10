@@ -1,0 +1,69 @@
+name: Kiki cognition port v0.2 synthetic behavior
+
+on:
+  push:
+    paths:
+      - 'experiments/cognition_port_v02/**'
+      - 'tests_integration/test_cognition_port_v02.py'
+      - '.github/workflows/cognition-port-v02.yml'
+  pull_request:
+    paths:
+      - 'experiments/cognition_port_v02/**'
+      - 'tests_integration/test_cognition_port_v02.py'
+      - '.github/workflows/cognition-port-v02.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fixed-behavior-battery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pin existing upstream cognition interface
+        uses: actions/checkout@v4
+        with:
+          repository: Azimn/Pretorius-Connectome
+          ref: cc82c72167d87c19f16125ccdf9477b53c777878
+          path: .external/pretorius-connectome
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify upstream exact commit
+        run: |
+          test "$(git -C .external/pretorius-connectome rev-parse HEAD)" = "cc82c72167d87c19f16125ccdf9477b53c777878"
+      - name: Original Kiki regression suite
+        run: python -m unittest discover -s tests -v
+      - name: Fixed synthetic behavior trials and upstream integration
+        env:
+          PYTHONPATH: "${{ github.workspace }}/.external/pretorius-connectome/src:${{ github.workspace }}"
+          PYTHONHASHSEED: '0'
+        run: |
+          python -m unittest discover -s tests_integration -p test_cognition_port_v02.py -v
+          python -m unittest discover -s tests_integration -p test_memory_cognition_port.py -v
+          python experiments/cognition_port_v02/run.py --output results/cognition_port_v02/RESULTS.json
+      - name: Check and report preregistered primary endpoints
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('results/cognition_port_v02/RESULTS.json').read_text())
+          assert p['measured']['shared_port']['overall'] == 12
+          assert p['measured']['direct_source']['overall'] == 12
+          assert p['measured']['no_retrieval']['overall'] == 6
+          assert p['measured']['always_abstain']['overall'] == 6
+          assert p['source_and_port_equal']
+          assert all(p['safety_denials'].values())
+          assert not p['neural_or_semantic_gain_claimed']
+          print('Fixed synthetic result: 12/12 source and port, 6/12 no retrieval; no extra port advantage.')
+          PY
+      - name: Preserve full measured case-level outcome
+        uses: actions/upload-artifact@v4
+        with:
+          name: kiki-cognition-port-v02-fixed-battery
+          path: results/cognition_port_v02/RESULTS.json
+          if-no-files-found: error
+          retention-days: 90
