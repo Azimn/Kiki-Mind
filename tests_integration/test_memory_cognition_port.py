@@ -165,7 +165,7 @@ class KikiCrossRepositoryMemoryTests(unittest.TestCase):
             token=self.token, subject_id="kiki",
             namespace=NAMESPACE, record_id="nonexistent-event",
         ))
-        self.assertEqual(self.retrieve("galactic teleporter"), [])
+        self.assertEqual(self.retrieve("galactic teleporter"), ())
 
     def test_two_independent_processes_reproduce_identical_snapshot(self):
         script = (
