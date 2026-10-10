@@ -39,9 +39,9 @@ jobs:
       - name: Check exact external source pin
         run: |
           test "$(git -C .external/pretorius-connectome rev-parse HEAD)" = "cc82c72167d87c19f16125ccdf9477b53c777878"
-      - name: Existing Kiki tests without modifying canonical event policy
-        run: python -m unittest discover -s tests -v
       - name: Two-project source isolation and Kiki read-only ledger tests
         env:
           PYTHONPATH: "${{ github.workspace }}/.external/pretorius-connectome/src:${{ github.workspace }}"
         run: python -m unittest discover -s tests_integration -p 'test_memory_cognition_port.py' -v
+      - name: Existing Kiki tests without modifying canonical event policy
+        run: python -m unittest discover -s tests -v
