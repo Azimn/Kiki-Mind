@@ -108,6 +108,8 @@ def inspect(pack: Any) -> dict[str, Any]:
             fail(f"observation_{i}_invalid_timestamp")
         if not isinstance(item.get("provenance"), str) or item["provenance"] not in PROVENANCE or not isinstance(item.get("verification"), str) or item["verification"] not in VERIFICATION:
             fail(f"observation_{i}_invalid_source_status")
+        if not sha256(item.get("stimulus_sha256")) or not sha256(item.get("instruction_sha256")):
+            fail(f"observation_{i}_missing_stimulus_evidence")
         if not sha256(item.get("raw_response_sha256")) or not nonblank(item.get("source_ref")):
             fail(f"observation_{i}_missing_raw_evidence")
         if any(not nonblank(item.get(k)) for k in ("choice", "reason", "acknowledged_tradeoff", "revision_condition")):
@@ -120,12 +122,13 @@ def inspect(pack: Any) -> dict[str, Any]:
         counts[item["provenance"]] += 1
         if item["provenance"] == "renderer_output" and item["verification"] != "unverified":
             valid_observations.append(item)
-    # Comparison is permitted only in identical declared stimulus/context
-    # conditions. A differing choice is a research lead, NOT evidence of
+    # Comparison requires matching declared context AND matching hashes of
+    # exact stimulus and instructions. Hashes are asserted, not authenticated.
+    # Conditions still require external audit. A differing choice is a research lead, NOT evidence of
     # different characters or a verdict on either implementation.
-    grouped: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    grouped: dict[tuple[str, str, str, str], list[dict[str, Any]]] = {}
     for obs in valid_observations:
-        key = (obs["scene_id"], obs["context_id"])
+        key = (obs["scene_id"], obs["context_id"], obs["stimulus_sha256"], obs["instruction_sha256"])
         grouped.setdefault(key, []).append(obs)
     comparable = 0
     divergent = 0
