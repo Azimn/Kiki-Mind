@@ -24,6 +24,7 @@ def response(id="a", implementation="gpt4", choice="playful", context="matched-v
         "model_id": "unknown", "context_id": context, "recorded_at": DATE,
         "provenance": "renderer_output", "verification": "connector_readback",
         "raw_response_sha256": DIGEST, "source_ref": "private/" + id,
+        "stimulus_sha256": "b" * 64, "instruction_sha256": "c" * 64,
         "choice": choice, "reason": "Because it has more personality.",
         "acknowledged_tradeoff": "Less reliable.",
         "revision_condition": "I would change if it stopped working.",
@@ -196,6 +197,32 @@ class KikiChoiceStudioTests(unittest.TestCase):
         s["options"] = ["playful", {"malformed": True}]
         with self.assertRaisesRegex(StudioRejected, "invalid_options"):
             inspect(pack(scenes=[s]))
+
+    def test_different_stimulus_hash_not_comparable(self):
+        a = response("1", "gpt4")
+        b = response("2", "jan", "robust")
+        b["stimulus_sha256"] = "d" * 64
+        report = inspect(pack(observations=[a, b]))
+        self.assertEqual(report["matched_context_groups"], 0)
+
+    def test_different_instruction_hash_not_comparable(self):
+        a = response("1", "gpt4")
+        b = response("2", "jan", "robust")
+        b["instruction_sha256"] = "e" * 64
+        report = inspect(pack(observations=[a, b]))
+        self.assertEqual(report["matched_context_groups"], 0)
+
+    def test_missing_stimulus_hash_rejected(self):
+        o = response()
+        del o["stimulus_sha256"]
+        with self.assertRaisesRegex(StudioRejected, "missing_stimulus_evidence"):
+            inspect(pack(observations=[o]))
+
+    def test_malformed_instruction_hash_rejected(self):
+        o = response()
+        o["instruction_sha256"] = ["c" * 64]
+        with self.assertRaisesRegex(StudioRejected, "missing_stimulus_evidence"):
+            inspect(pack(observations=[o]))
 
 
 if __name__ == "__main__":
