@@ -155,5 +155,48 @@ class KikiChoiceStudioTests(unittest.TestCase):
             inspect(pack(scenes=[s]))
 
 
+    def test_nonhashable_domain_rejected_as_studio_error(self):
+        s = scene()
+        s["domain"] = ["aesthetics"]
+        with self.assertRaisesRegex(StudioRejected, "invalid_domain_or_choice_type"):
+            inspect(pack(scenes=[s]))
+
+    def test_nonhashable_choice_type_rejected_as_studio_error(self):
+        s = scene()
+        s["choice_type"] = {"bad": True}
+        with self.assertRaisesRegex(StudioRejected, "invalid_domain_or_choice_type"):
+            inspect(pack(scenes=[s]))
+
+    def test_nonhashable_provenance_rejected_as_studio_error(self):
+        o = response()
+        o["provenance"] = ["renderer_output"]
+        with self.assertRaisesRegex(StudioRejected, "invalid_source_status"):
+            inspect(pack(observations=[o]))
+
+    def test_nonhashable_verification_rejected_as_studio_error(self):
+        o = response()
+        o["verification"] = {"status": "connector_readback"}
+        with self.assertRaisesRegex(StudioRejected, "invalid_source_status"):
+            inspect(pack(observations=[o]))
+
+    def test_missing_exception_flag_rejected_before_option_check(self):
+        o = response(choice="other")
+        del o["explicit_rejection_of_options"]
+        with self.assertRaisesRegex(StudioRejected, "missing_choice_exception_flag"):
+            inspect(pack(observations=[o]))
+
+    def test_integer_exception_flag_not_treated_as_true(self):
+        o = response(choice="other")
+        o["explicit_rejection_of_options"] = 1
+        with self.assertRaisesRegex(StudioRejected, "missing_choice_exception_flag"):
+            inspect(pack(observations=[o]))
+
+    def test_nonhashable_option_rejected_as_studio_error(self):
+        s = scene()
+        s["options"] = ["playful", {"malformed": True}]
+        with self.assertRaisesRegex(StudioRejected, "invalid_options"):
+            inspect(pack(scenes=[s]))
+
+
 if __name__ == "__main__":
     unittest.main()
