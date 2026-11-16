@@ -74,7 +74,7 @@ def inspect(pack: Any) -> dict[str, Any]:
         sid = s.get("id")
         if not canonical_id(sid) or sid in known:
             fail(f"scene_{i}_invalid_or_duplicate_id")
-        if s.get("domain") not in DOMAINS or s.get("choice_type") not in KIND:
+        if not isinstance(s.get("domain"), str) or s["domain"] not in DOMAINS or not isinstance(s.get("choice_type"), str) or s["choice_type"] not in KIND:
             fail(f"scene_{i}_invalid_domain_or_choice_type")
         if not nonblank(s.get("prompt")) or not nonblank(s.get("tradeoff")):
             fail(f"scene_{i}_missing_prompt_or_tradeoff")
@@ -106,17 +106,17 @@ def inspect(pack: Any) -> dict[str, Any]:
             fail(f"observation_{i}_incomplete_implementation_provenance")
         if not valid_stamp(item.get("recorded_at")):
             fail(f"observation_{i}_invalid_timestamp")
-        if item.get("provenance") not in PROVENANCE or item.get("verification") not in VERIFICATION:
+        if not isinstance(item.get("provenance"), str) or item["provenance"] not in PROVENANCE or not isinstance(item.get("verification"), str) or item["verification"] not in VERIFICATION:
             fail(f"observation_{i}_invalid_source_status")
         if not sha256(item.get("raw_response_sha256")) or not nonblank(item.get("source_ref")):
             fail(f"observation_{i}_missing_raw_evidence")
         if any(not nonblank(item.get(k)) for k in ("choice", "reason", "acknowledged_tradeoff", "revision_condition")):
             fail(f"observation_{i}_incomplete_choice")
-        if known[sid]["choice_type"] == "bounded" and item["choice"] not in known[sid]["options"]:
-            if not item.get("explicit_rejection_of_options"):
-                fail(f"observation_{i}_unsupported_bounded_choice")
         if type(item.get("explicit_rejection_of_options")) is not bool:
             fail(f"observation_{i}_missing_choice_exception_flag")
+        if known[sid]["choice_type"] == "bounded" and item["choice"] not in known[sid]["options"]:
+            if not item["explicit_rejection_of_options"]:
+                fail(f"observation_{i}_unsupported_bounded_choice")
         counts[item["provenance"]] += 1
         if item["provenance"] == "renderer_output" and item["verification"] != "unverified":
             valid_observations.append(item)
