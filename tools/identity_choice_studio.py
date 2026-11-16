@@ -132,11 +132,18 @@ def inspect(pack: Any) -> dict[str, Any]:
         grouped.setdefault(key, []).append(obs)
     comparable = 0
     divergent = 0
+    within_implementation_variable = 0
     for group in grouped.values():
-        impls = {x["implementation_id"] for x in group}
-        if len(impls) >= 2:
+        by_impl: dict[str, set[str]] = {}
+        for item in group:
+            by_impl.setdefault(item["implementation_id"], set()).add(item["choice"])
+        if len(by_impl) >= 2:
             comparable += 1
-            if len({x["choice"] for x in group}) > 1:
+            # If one implementation varies across repeats, do not attribute
+            # that variation to the difference between implementations.
+            if any(len(choices) > 1 for choices in by_impl.values()):
+                within_implementation_variable += 1
+            elif len({next(iter(choices)) for choices in by_impl.values()}) > 1:
                 divergent += 1
     return {
         "schema": "kiki.choice-studio-receipt.v1",
@@ -147,6 +154,7 @@ def inspect(pack: Any) -> dict[str, Any]:
         "provenance_classes": dict(sorted(counts.items())),
         "matched_context_groups": comparable,
         "choice_divergence_groups_unresolved": divergent,
+        "within_implementation_variable_groups": within_implementation_variable,
         "user_preference_disclosed_scenes": sum(s["user_preference_disclosed"] for s in scenes),
         "new_enduring_preferences_established": 0,
         "canonical_writes": 0,
