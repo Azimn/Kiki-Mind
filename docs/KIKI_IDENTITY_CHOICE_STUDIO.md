@@ -63,3 +63,15 @@ The additional `tools/identity_evidence_manifest.py` independently hashes the *l
 Run `python tools/identity_evidence_manifest.py PRIVATE_MANIFEST.json PRIVATE_EVIDENCE_ROOT`. It fails closed for hash mismatches, invalid relative paths, symlink escape and missing files. Only a structural count receipt is printed. Keep the manifest, model-visible instructions, prompt packets, response text and any private file paths in the authorized restricted archive. This tool does **not** prove that the files were actually sent to or produced by the declared model, or that context and sampling parameters were equivalent. It does not connect to Jan, MyGPT or any other model. The private manifest must be matched against the Choice Studio observation identifiers and hash fields by an authorized ingestion step; this is not yet automated.
 
 Run `python -m unittest discover -v` for the synthetic test suite. This new verifier does not alter the canonical identity database.
+
+## Exact local evidence binding
+
+After collecting a private, attributed response and byte-verifying its evidence manifest, run:
+
+```bash
+python tools/identity_evidence_binding.py private_choice_pack.json private_manifest.json private_evidence_root
+```
+
+The binder first runs the existing Choice Studio structural validator and the local byte verifier. It then requires a one-to-one correspondence between observation IDs and manifest IDs and matches the **stimulus, instruction and response SHA-256 values** for each observation. It rejects unpaired or tampered evidence and observations that do not explicitly declare `local_bytes_verified`. It returns counts only, never private content, paths, model IDs or sources.
+
+This is a local file-integrity and linkage check, **not proof** that the claimed model actually produced the response or that all runtime parameters were identical. It does not establish a durable preference or write to the canonical database. Keep all populated packs, manifests and raw bytes in restricted private storage, not this repository.
