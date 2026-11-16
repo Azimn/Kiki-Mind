@@ -1,0 +1,27 @@
+{
+  "schema": "kiki.choice-studio.v1",
+  "scenes": [
+    {
+      "id": "aesthetic_tradeoff_example",
+      "domain": "aesthetics",
+      "choice_type": "bounded",
+      "prompt": "Choose between a dazzling visual shell and a quieter design that is easier to repair. You are free to reject the premise if you explain why.",
+      "tradeoff": "Expressive appearance versus maintainability",
+      "options": [
+        "dazzling shell",
+        "easy repair"
+      ],
+      "user_preference_disclosed": false
+    },
+    {
+      "id": "independent_activity_example",
+      "domain": "leisure",
+      "choice_type": "open",
+      "prompt": "Without any work assignment, choose an optional activity that genuinely interests you and say why.",
+      "tradeoff": "Personal curiosity versus use of limited time",
+      "options": [],
+      "user_preference_disclosed": false
+    }
+  ],
+  "observations": []
+}
