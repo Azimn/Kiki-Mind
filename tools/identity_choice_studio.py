@@ -86,7 +86,7 @@ def inspect(pack: Any) -> dict[str, Any]:
                 fail(f"scene_{i}_invalid_bounded_options")
         elif opts:
             fail(f"scene_{i}_open_scene_has_forced_options")
-        if s.get("user_preference_disclosed") not in (True, False):
+        if type(s.get("user_preference_disclosed")) is not bool:
             fail(f"scene_{i}_missing_leadingness_flag")
         known[sid] = s
     seen: set[str] = set()
@@ -100,7 +100,7 @@ def inspect(pack: Any) -> dict[str, Any]:
         if not canonical_id(oid) or oid in seen:
             fail(f"observation_{i}_invalid_or_duplicate_id")
         seen.add(oid)
-        if sid not in known:
+        if not canonical_id(sid) or sid not in known:
             fail(f"observation_{i}_unknown_scene")
         if any(not canonical_id(item.get(k)) for k in ("implementation_id", "model_id", "context_id")):
             fail(f"observation_{i}_incomplete_implementation_provenance")
@@ -115,7 +115,7 @@ def inspect(pack: Any) -> dict[str, Any]:
         if known[sid]["choice_type"] == "bounded" and item["choice"] not in known[sid]["options"]:
             if not item.get("explicit_rejection_of_options"):
                 fail(f"observation_{i}_unsupported_bounded_choice")
-        if item.get("explicit_rejection_of_options") not in (True, False):
+        if type(item.get("explicit_rejection_of_options")) is not bool:
             fail(f"observation_{i}_missing_choice_exception_flag")
         counts[item["provenance"]] += 1
         if item["provenance"] == "renderer_output" and item["verification"] != "unverified":
