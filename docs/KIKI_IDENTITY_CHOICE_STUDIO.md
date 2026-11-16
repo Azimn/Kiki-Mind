@@ -40,3 +40,26 @@ The earliest K1-K1 instructions, a September 2026 retained Kiki-Mind conversatio
 A model can invent an attractive reason after choosing. A prompt can bias a choice even if the disclosure flag is false. Without independent source inspection and historical holdout controls, this studio cannot determine what Kiki herself believes. The output fields `new_enduring_preferences_established` and `canonical_writes` are always zero by design.
 
 Do not automatically promote any result into Kiki-Mind, Control Room, David-Vesel or any other personal memory. Runtime endorsement and history reconciliation require a separate authorized, tested integration with the existing Developmental Evidence Layer.
+
+
+## Private exact-byte evidence verification
+
+The additional `tools/identity_evidence_manifest.py` independently hashes the *local raw bytes* of stimulus, instruction and response files before an observation is accepted for downstream research. Its input is a private JSON manifest, never a public fixture. Example shape (illustrative placeholders, not valid evidence):
+
+```json
+{
+  "schema": "kiki.choice-evidence.v1",
+  "observations": [
+    {
+      "id": "trial-001",
+      "stimulus": {"path": "trial-001/stimulus.txt", "sha256": "<actual lowercase SHA-256>"},
+      "instruction": {"path": "trial-001/instruction.txt", "sha256": "<actual lowercase SHA-256>"},
+      "response": {"path": "trial-001/response.txt", "sha256": "<actual lowercase SHA-256>"}
+    }
+  ]
+}
+```
+
+Run `python tools/identity_evidence_manifest.py PRIVATE_MANIFEST.json PRIVATE_EVIDENCE_ROOT`. It fails closed for hash mismatches, invalid relative paths, symlink escape and missing files. Only a structural count receipt is printed. Keep the manifest, model-visible instructions, prompt packets, response text and any private file paths in the authorized restricted archive. This tool does **not** prove that the files were actually sent to or produced by the declared model, or that context and sampling parameters were equivalent. It does not connect to Jan, MyGPT or any other model. The private manifest must be matched against the Choice Studio observation identifiers and hash fields by an authorized ingestion step; this is not yet automated.
+
+Run `python -m unittest discover -v` for the synthetic test suite. This new verifier does not alter the canonical identity database.
