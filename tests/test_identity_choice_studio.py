@@ -225,5 +225,32 @@ class KikiChoiceStudioTests(unittest.TestCase):
             inspect(pack(observations=[o]))
 
 
+    def test_within_renderer_variation_not_cross_renderer_divergence(self):
+        observations = [response("1", "gpt4", "playful"),
+                        response("2", "gpt4", "robust"),
+                        response("3", "jan", "playful")]
+        result = inspect(pack(observations=observations))
+        self.assertEqual(result["matched_context_groups"], 1)
+        self.assertEqual(result["within_implementation_variable_groups"], 1)
+        self.assertEqual(result["choice_divergence_groups_unresolved"], 0)
+
+    def test_stable_cross_renderer_difference_remains_visible(self):
+        observations = [response("1", "gpt4", "playful"),
+                        response("2", "gpt4", "playful"),
+                        response("3", "jan", "robust"),
+                        response("4", "jan", "robust")]
+        result = inspect(pack(observations=observations))
+        self.assertEqual(result["within_implementation_variable_groups"], 0)
+        self.assertEqual(result["choice_divergence_groups_unresolved"], 1)
+
+    def test_variability_and_difference_not_double_counted(self):
+        observations = [response("1", "gpt4", "playful"),
+                        response("2", "gpt4", "robust"),
+                        response("3", "jan", "robust")]
+        result = inspect(pack(observations=observations))
+        self.assertEqual(result["within_implementation_variable_groups"], 1)
+        self.assertEqual(result["choice_divergence_groups_unresolved"], 0)
+
+
 if __name__ == "__main__":
     unittest.main()
