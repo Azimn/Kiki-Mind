@@ -84,6 +84,14 @@ class ContinuityFixtureAuditTests(unittest.TestCase):
         with self.assertRaisesRegex(FixtureRejected, 'duplicate_source_reference'):
             audit(fixture)
 
+    def test_same_locator_different_evidence_kind_rejected(self):
+        fixture = dataset()
+        duplicate = source('reinterpretation', 'derived_interpretation', 'reported_claim')
+        duplicate['source_ref'] = fixture['sources'][0]['source_ref']
+        fixture['sources'].append(duplicate)
+        with self.assertRaisesRegex(FixtureRejected, 'duplicate_source_reference'):
+            audit(fixture)
+
     def test_duplicate_case_id_rejected(self):
         fixture = dataset()
         fixture['cases'].append(deepcopy(fixture['cases'][0]))
