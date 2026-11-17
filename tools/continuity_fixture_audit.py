@@ -81,7 +81,9 @@ def audit(dataset: Any, *, allow_private_paths: bool = True) -> dict[str, Any]:
             _fail(f'source_{index}_invalid_classification')
         if sid in by_id:
             _fail('duplicate_source_id')
-        refkey = (kind, ref)
+        # A source locator identifies one underlying record regardless of evidence class.
+        # Reclassification requires a separate interpretation, not a duplicate source.
+        refkey = ref
         if refkey in seen_refs:
             _fail('duplicate_source_reference')
         seen_refs.add(refkey)
